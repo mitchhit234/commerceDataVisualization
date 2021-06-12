@@ -1,6 +1,6 @@
 __pycache__
 export.csv
-app.db
+transaction.db
 email.eml
 alerts
 credentials.json

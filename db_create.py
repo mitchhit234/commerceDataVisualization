@@ -2,6 +2,14 @@ import sqlite3
 from sqlite3 import Error 
 import traceback
 
+#Default filenames, change as needed
+#Change db_update as well
+DB_NAME = "transaction.db"
+TABLE_NAME = "TRANSACTIONS"
+CREATE_SCRIPT = "table_creation.sql"
+IMPORT_FILE = "export.csv"
+
+
 #Will create a database with the desired name
 #and return a cursor object to that database
 #If the database already exists, it will 
@@ -29,9 +37,8 @@ def create_table(cur,filename):
 
 #Insert each row from our CSV file into our database
 #Will output error messages for duplicate rows
-def insert_statement_data(cur,filename):
+def insert_statement_data(cur,filename,table_name):
   current_num = 1
-  table_name = "TRANSACTIONS"
 
   #Make sure table is empty. comment out this line if you wish to append data
   #from a statement to another database with data, must not have any overlapping entries
@@ -102,12 +109,10 @@ def net(debit_credit):
 
 
 if __name__ == "__main__":
-  conn = create_database("app.db")
+  conn = create_database(DB_NAME)
   cursor = conn.cursor()
-
-  create_table(cursor,"table_creation.sql")
-  insert_statement_data(cursor,"export.csv")
-  
+  create_table(cursor,CREATE_SCRIPT)
+  insert_statement_data(cursor,IMPORT_FILE,TABLE_NAME) 
   conn.commit()
   conn.close()
 

@@ -4,7 +4,7 @@ This will make it easier for us to determine which transactions happened in what
 order, since datetime is not used by commerce and we could have transactions
 on the same date */
 
-CREATE TABLE TRANSACTIONS (
+CREATE TABLE IF NOT EXISTS TRANSACTIONS (
   date DATE NOT NULL,
   num INT UNSIGNED NOT NULL,
   description CHAR NOT NULL,
