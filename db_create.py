@@ -100,7 +100,7 @@ def net(debit_credit):
   return debit_credit[0], debit_credit[1]
 
 
-#Main
+
 if __name__ == "__main__":
   conn = create_database("app.db")
   cursor = conn.cursor()
