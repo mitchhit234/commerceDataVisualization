@@ -4,7 +4,7 @@ import base64
 import db_create as db
 
 
-#More default file names and other variables
+#Default file names and other variables
 #Change only if needed
 CLIENT_SECRET_FILE = "credentials.json"
 API_NAME = "gmail"
