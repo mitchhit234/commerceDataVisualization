@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import db_create as db
 
 import plotly.offline as py
+import plotly.graph_objects as go
 import pandas as pd
 
 
@@ -13,7 +14,7 @@ import pandas as pd
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Will change this to an input later
-CURRENT_VALUE = 3188.71
+CURRENT_VALUE = 3133.91
 
 
 #Template for returning a plot object
@@ -41,6 +42,7 @@ def fetch_current(D,current):
     ret.append(current)
   return ret
   
+
 #Since date information from Commerce does not contain time
 #I use this function to prevent transactions from stacking on top 
 #of each other in our graphs by seperating them with hour variables
@@ -48,27 +50,28 @@ def fetch_current(D,current):
 def adjust_dates(D):
   ret = []
   current, count = "", 0
-  for j, row in D.iterrows():
+
+  for _, row in D.iterrows():
     if row['date'] == current:
       count += 1
-    if row['date'] != current or j == len(D):
-      denom = count + 1
-      for i in range(1,denom):
-        hr_extension = int((i/denom)*24)
-        ret.append(current + " " + str(hr_extension))
-
+    else:
+      update_date_list(ret,count,current)
       current = row['date']
       count = 1
-    
-      if j == len(D)-1:
-        denom = count + 1
-        for i in range(1,denom):
-          hr_extension = int((i/denom)*24)
-          ret.append(current + " " + str(hr_extension))
 
-
-
+  #Catch any transactions remaining after our loop 
+  update_date_list(ret,count,current)
   return ret
+  
+
+#Inserts dates in order of occurence into our
+#eventual new date column
+def update_date_list(L,count,current):
+  denom = count + 1
+  for i in range(1,denom):
+    hr_extension = int((i/denom)*24)
+    L.append(current + " " + str(hr_extension))
+  return L
 
 
 
@@ -77,13 +80,22 @@ def adjust_dates(D):
 #current value, given a list of transactions
 #and the starting balance before those transactions
 def plot_by_date(D):
-  py.plot([{
-    'x': D['date'],
-    'y': D[col],
-    'name': col
-  } for col in D.columns[3:] if col != 'net'])
+  # py.plot([{
+  #   'x': D['date'],
+  #   'y': D[col],
+  #   'name': col
+  # } for col in D.columns[3:] if col != 'net'])
 
+  D.replace(to_replace=[0], value=np.nan, inplace=True)
 
+  fig = go.Figure()
+  for col in D.columns[3:]:
+    if col != 'net':
+      m = 'markers'
+      if col == 'current':
+        m = 'lines'
+      fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
+  fig.show()
 
 
 
