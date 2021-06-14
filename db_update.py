@@ -48,6 +48,20 @@ def get_max_col(cur,col_name,tbl_name):
   cur.execute(statement)
   return cur.fetchone()[0]
 
+
+def get_last_transactions(cur,key,tbl_name):
+  statement = "SELECT * FROM " + tbl_name + " WHERE " + key + " = "
+  statement += "(SELECT MAX(" + key + ") FROM " + tbl_name + ")"
+  cur.execute(statement)
+  return cur.fetchall()
+
+def prevent_repeats(inst,repeats):
+  for i in range(len(repeats)):
+    if repeats[i][2:4] == tuple(inst[2:4]) and repeats[i][0] == inst[0].replace('"',''):
+      return False
+    return True
+
+
 #Will help fetch the correct part of the email
 #for various email formats
 def find_correct_mimeType(P):
@@ -68,6 +82,7 @@ if __name__ == "__main__":
   cursor = conn.cursor()
   current_num = get_max_col(cursor,"num",TABLE_NAME) + 1
   last_date = get_max_col(cursor,"date",TABLE_NAME)
+  last_entries = get_last_transactions(cursor,"date",TABLE_NAME)
 
   #Query via the GMail API for message IDs
   L = service.users().messages().list(userId='me', maxResults=DEPTH, q='from:' + ALERT_ADDRESS).execute()
@@ -93,9 +108,11 @@ if __name__ == "__main__":
       #in the database, i.e. is this a new transaction
       if compare_dates(date.strip('"'),last_date):
         #Prepare the parsed info for an Insert Statement
-        values = [reorder_date(r[3].text), str(0), 
-                  f'"{r[4].text}"', clean_money(r[5].text), 'NULL']   
-        valid_values.append(values)
+        values = [reorder_date(r[3].text), str(0), r[4].text, float(clean_money(r[5].text)), 'None']
+        if prevent_repeats(values,last_entries):
+          values = [reorder_date(r[3].text), str(0), 
+                    f'"{r[4].text}"', clean_money(r[5].text), 'NULL']         
+          valid_values.append(values)
 
   #GMail query returns emails from newest to oldest
   #We want to insert those in the reverse order
