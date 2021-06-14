@@ -59,7 +59,7 @@ def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
     if repeats[i][2:4] == tuple(inst[2:4]) and repeats[i][0] == inst[0].replace('"',''):
       return False
-    return True
+  return True
 
 
 #Will help fetch the correct part of the email
