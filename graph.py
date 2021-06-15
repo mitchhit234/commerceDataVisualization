@@ -105,7 +105,7 @@ if __name__ == "__main__":
   cursor = conn.cursor()
 
   #Fetch all current data
-  statement = "SELECT * FROM " + TABLE_NAME
+  statement = "SELECT * FROM " + TABLE_NAME + "ORDER BY num"
   cursor.execute(statement)
   data = cursor.fetchall()
 
