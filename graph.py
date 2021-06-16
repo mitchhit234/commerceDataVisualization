@@ -80,11 +80,15 @@ def update_date_list(L,count,current):
 #current value, given a list of transactions
 #and the starting balance before those transactions
 def plot_by_date(D):
-  # py.plot([{
-  #   'x': D['date'],
-  #   'y': D[col],
-  #   'name': col
-  # } for col in D.columns[3:] if col != 'net'])
+  a = py.plot([{
+    'x': D['date'],
+    'y': D[col],
+    'name': col
+  } for col in D.columns[3:] if col != 'net'], include_plotlyjs=False, output_type='div')
+
+  
+
+
 
   D.replace(to_replace=[0], value=np.nan, inplace=True)
 
@@ -105,7 +109,7 @@ if __name__ == "__main__":
   cursor = conn.cursor()
 
   #Fetch all current data
-  statement = "SELECT * FROM " + TABLE_NAME + "ORDER BY num"
+  statement = "SELECT * FROM " + TABLE_NAME + " ORDER BY num"
   cursor.execute(statement)
   data = cursor.fetchall()
 

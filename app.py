@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-  return "Hello World!"
+  return render_template("temp-plot.html")
 
 @app.route('/welcome')
 def welcome():
