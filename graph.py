@@ -80,11 +80,39 @@ def update_date_list(L,count,current):
 #current value, given a list of transactions
 #and the starting balance before those transactions
 def plot_by_date(D):
-  a = py.plot([{
-    'x': D['date'],
-    'y': D[col],
-    'name': col
-  } for col in D.columns[3:] if col != 'net'], include_plotlyjs=False, output_type='div')
+  # a = py.plot([{
+  #   'x': D['date'],
+  #   'y': D[col],
+  #   'name': col
+  # } for col in D.columns[3:] if col != 'net'], include_plotlyjs=False, output_type='div',
+  # xaxis=dict(
+  #     rangeselector=dict(
+  #       buttons=list([
+  #         dict(count=1,
+  #             label="1m",
+  #             step="month",
+  #             stepmode="backward"),
+  #         dict(count=6,
+  #             label="6m",
+  #             step="month",
+  #             stepmode="backward"),
+  #         dict(count=1,
+  #             label="YTD",
+  #             step="year",
+  #             stepmode="todate"),
+  #         dict(count=1,
+  #             label="1y",
+  #             step="year",
+  #             stepmode="backward"),
+  #         dict(step="all")
+  #       ])
+  #     ),
+  #     rangeslider=dict(
+  #       visible=True
+  #     ),
+  #     type="date"
+  #   )
+  # )
 
   
 
@@ -99,7 +127,42 @@ def plot_by_date(D):
       if col == 'current':
         m = 'lines'
       fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
-  fig.show()
+  
+
+  fig.update_layout(
+    xaxis=dict(
+      rangeselector=dict(
+        buttons=list([
+          dict(count=1,
+              label="1m",
+              step="month",
+              stepmode="backward"),
+          dict(count=6,
+              label="6m",
+              step="month",
+              stepmode="backward"),
+          dict(count=1,
+              label="YTD",
+              step="year",
+              stepmode="todate"),
+          dict(count=1,
+              label="1y",
+              step="year",
+              stepmode="backward"),
+          dict(step="all")
+        ])
+      ),
+      rangeslider=dict(
+        visible=True
+      ),
+      type="date"
+    )
+  )
+
+  a = py.plot(fig,include_plotlyjs=False, output_type='div')
+  print(a)
+  # fig.show()
+            
 
 
 
