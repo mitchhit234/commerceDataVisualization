@@ -1,0 +1,15 @@
+plot of current balance
+plot of debits and plot of credits
+toggle different dates for plot (1D,1W,1M,etc.)
+
+hover points to show transaction information (net value, description, time)
+
+Over time period -
+Max,Min balance
+Max Debit and Credit 
+Previous value, current value
+% change
+
+Normal list of transactions
+
+Grouping of transactions (rent, food, utilities, job deposits, investment account deposits, etc.)
