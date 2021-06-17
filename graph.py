@@ -127,6 +127,11 @@ def plot_by_date(D):
     )
   )
 
+  fig.update_layout(autosize=False,
+    width=1200,
+    height=1000,
+  )
+
   a = py.plot(fig,include_plotlyjs=False, output_type='div')
   return a
 
