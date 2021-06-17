@@ -9,7 +9,6 @@ import pandas as pd
 
 
 
-
 #Default filenames, change as needed
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
@@ -54,6 +53,8 @@ def adjust_dates(D):
   for _, row in D.iterrows():
     if row['date'] == current:
       count += 1
+    #New date found, list of old dates are given
+    #evenly spaced times 
     else:
       update_date_list(ret,count,current)
       current = row['date']
@@ -75,58 +76,25 @@ def update_date_list(L,count,current):
 
 
 
-
 #Plotting transaction number against 
 #current value, given a list of transactions
 #and the starting balance before those transactions
 def plot_by_date(D):
-  # a = py.plot([{
-  #   'x': D['date'],
-  #   'y': D[col],
-  #   'name': col
-  # } for col in D.columns[3:] if col != 'net'], include_plotlyjs=False, output_type='div',
-  # xaxis=dict(
-  #     rangeselector=dict(
-  #       buttons=list([
-  #         dict(count=1,
-  #             label="1m",
-  #             step="month",
-  #             stepmode="backward"),
-  #         dict(count=6,
-  #             label="6m",
-  #             step="month",
-  #             stepmode="backward"),
-  #         dict(count=1,
-  #             label="YTD",
-  #             step="year",
-  #             stepmode="todate"),
-  #         dict(count=1,
-  #             label="1y",
-  #             step="year",
-  #             stepmode="backward"),
-  #         dict(step="all")
-  #       ])
-  #     ),
-  #     rangeslider=dict(
-  #       visible=True
-  #     ),
-  #     type="date"
-  #   )
-  # )
-
-  
-
-
-
+  #Make credit and debit price charts format nicer
   D.replace(to_replace=[0], value=np.nan, inplace=True)
 
+  #Figure containing lines for debit, credit, and net account balance
+  # fig = go.Figure()
+  # for col in D.columns[3:]:
+  #   if col != 'net':
+  #     m = 'markers'
+  #     if col == 'current':
+  #       m = 'lines'
+  #     fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
+
+  #Figure containing net account balance
   fig = go.Figure()
-  for col in D.columns[3:]:
-    if col != 'net':
-      m = 'markers'
-      if col == 'current':
-        m = 'lines'
-      fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
+  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', name='Current Balance'))
   
 
   fig.update_layout(
@@ -160,14 +128,13 @@ def plot_by_date(D):
   )
 
   a = py.plot(fig,include_plotlyjs=False, output_type='div')
-  print(a)
-  # fig.show()
-            
+  return a
 
 
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def main():
   conn = db.create_database(DB_NAME)
   cursor = conn.cursor()
 
@@ -187,6 +154,6 @@ if __name__ == "__main__":
   
   df['date'] = adjust_dates(df)
 
-  plot_by_date(df)
+  return plot_by_date(df)
 
 

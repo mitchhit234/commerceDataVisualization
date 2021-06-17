@@ -1,4 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
+import graph as g
+
 
 app = Flask(__name__)
 
@@ -11,7 +13,8 @@ def home():
 
 @app.route('/welcome')
 def welcome():
-  return render_template("welcome.html")
+  pl = g.main()
+  return render_template("welcome.html",plot=pl)
 
 
 @app.route('/login', methods=['GET', 'POST'])
