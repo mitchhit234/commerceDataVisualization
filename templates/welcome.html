@@ -4,9 +4,16 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
     <title>Flask Intro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap-5.0.1-dist/css/bootstrap.min.css" rel="stylesheet", media="screen">
+    <link rel="stylesheet" href="static/bootstrap-5.0.1-dist/styles.css">
   </head>
   <body>
-    {{ plot|safe }}
+    <div class="grid-container">
+      <div class="grid-child blue">
+        {{ plot|safe }}
+      </div>
+      <div class="grid-child green">
+        Grid Column 2
+      </div>
+    </div>
   </body>
 </html>

@@ -127,12 +127,13 @@ def plot_by_date(D):
     )
   )
 
-  fig.update_layout(autosize=False,
-    width=1200,
-    height=1000,
-  )
+  cg = dict(responsive=True)
 
-  a = py.plot(fig,include_plotlyjs=False, output_type='div')
+  fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
+    paper_bgcolor="LightSteelBlue",
+    )
+
+  a = py.plot(fig,include_plotlyjs=False, output_type='div',config=cg)
   return a
 
 
