@@ -75,13 +75,36 @@ def update_date_list(L,count,current):
   return L
 
 
+#Configure X axis and rangeslider
+def set_fig_x_axis(figure,C,L,S,mode):
+  config = []
+  for c, l, s in zip(C,L,S):
+    temp = dict(count=c,label=l,step=s,stepmode=mode)
+    config.append(temp)
+
+  config.append(dict(step="all"))
+
+  figure.update_layout(
+    xaxis=dict(
+      rangeselector=dict(
+        buttons=config),
+      rangeslider=dict(
+        visible=True
+      ),
+      type="date"
+    )
+  )
+
+  return figure
+
+
 
 #Plotting transaction number against 
 #current value, given a list of transactions
 #and the starting balance before those transactions
 def plot_by_date(D):
   #Make credit and debit price charts format nicer
-  D.replace(to_replace=[0], value=np.nan, inplace=True)
+  # D.replace(to_replace=[0], value=np.nan, inplace=True)
 
   #Figure containing lines for debit, credit, and net account balance
   # fig = go.Figure()
@@ -96,44 +119,23 @@ def plot_by_date(D):
   fig = go.Figure()
   fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', name='Current Balance'))
   
+  #Configure variables for graph X axis
+  counts = [1, 7, 1, 6, 1, 1]
+  labels = ["Day", "Week", "Month", "6 Months", "YTD", "Year"]
+  steps = ["day", "day", "month", "month", "year", "year"]
+  stepmode = "backward"
 
-  fig.update_layout(
-    xaxis=dict(
-      rangeselector=dict(
-        buttons=list([
-          dict(count=1,
-              label="1m",
-              step="month",
-              stepmode="backward"),
-          dict(count=6,
-              label="6m",
-              step="month",
-              stepmode="backward"),
-          dict(count=1,
-              label="YTD",
-              step="year",
-              stepmode="todate"),
-          dict(count=1,
-              label="1y",
-              step="year",
-              stepmode="backward"),
-          dict(step="all")
-        ])
-      ),
-      rangeslider=dict(
-        visible=True
-      ),
-      type="date"
-    )
-  )
+  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode)
 
   cg = dict(responsive=True)
 
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     paper_bgcolor="LightSteelBlue",
-    )
+    height=800
+  )
 
   a = py.plot(fig,include_plotlyjs=False, output_type='div',config=cg)
+
   return a
 
 
@@ -161,5 +163,6 @@ def main():
   df['date'] = adjust_dates(df)
 
   return plot_by_date(df)
+
 
 

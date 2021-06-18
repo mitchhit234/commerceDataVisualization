@@ -7,13 +7,22 @@
     <link rel="stylesheet" href="static/bootstrap-5.0.1-dist/styles.css">
   </head>
   <body>
-    <div class="grid-container">
-      <div class="grid-child blue">
-        {{ plot|safe }}
+
+    <div class="grid-row-container">
+      <div class="grid-row-child">
+        Child 1
       </div>
-      <div class="grid-child green">
-        Grid Column 2
+      <div class="grid-row-child">
+        <div class="grid-col-container">
+          <div class="grid-col-child">
+            {{ plot|safe }}
+          </div>
+          <div class="grid-col-child">
+            Grid Column 2
+          </div>
+        </div>
       </div>
     </div>
+
   </body>
 </html>
