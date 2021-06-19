@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+from pandas.core.frame import DataFrame
 import db_create as db
 
 import plotly.offline as py
@@ -9,11 +10,15 @@ import pandas as pd
 
 
 
+
+
+
 #Default filenames, change as needed
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Will change this to an input later
 CURRENT_VALUE = 3133.91
+
 
 
 #Template for returning a plot object
@@ -33,7 +38,7 @@ def fetch_starting(D,current):
   #Round in case of floating point arithmetic getting wonky
   return round(current,2)
 
-
+#Initalize the current column
 def fetch_current(D,current):
   ret = []
   for _, row in D.iterrows():
@@ -87,13 +92,15 @@ def set_fig_x_axis(figure,C,L,S,mode):
   figure.update_layout(
     xaxis=dict(
       rangeselector=dict(
-        buttons=config),
+        buttons=config,font=dict(size=11)),
       rangeslider=dict(
         visible=True
       ),
       type="date"
     )
   )
+
+  figure.update_xaxes(rangeslider_thickness = 0.1)
 
   return figure
 
@@ -102,7 +109,7 @@ def set_fig_x_axis(figure,C,L,S,mode):
 #Plotting transaction number against 
 #current value, given a list of transactions
 #and the starting balance before those transactions
-def plot_by_date(D):
+def balance_plot(D):
   #Make credit and debit price charts format nicer
   # D.replace(to_replace=[0], value=np.nan, inplace=True)
 
@@ -117,7 +124,8 @@ def plot_by_date(D):
 
   #Figure containing net account balance
   fig = go.Figure()
-  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', name='Current Balance'))
+  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', 
+    line=dict(width=3,color="#03DA00"), name='Current Balance'))
   
   #Configure variables for graph X axis
   counts = [1, 7, 1, 6, 1, 1]
@@ -127,22 +135,22 @@ def plot_by_date(D):
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode)
 
-  cg = dict(responsive=True)
-
+  #Set div settings for margin, backround, and height
+  #Can't find a way to have the height fit to parent div
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
-    paper_bgcolor="LightSteelBlue",
-    height=800
+    height=700,
+    title=dict(text='ACCOUNT BALANCE',x=0.5,y=1,xanchor='center',yanchor='top'),
+    yaxis_title=dict(text='Dollars',standoff=10),
+    font=dict(family="Lucida Bright, monospace",size=13)
   )
 
-  a = py.plot(fig,include_plotlyjs=False, output_type='div',config=cg)
+  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',config=dict(responsive=True))
 
-  return a
-
-
+  return div_output
 
 
-#if __name__ == "__main__":
-def main():
+#Read from our DB and get our dataframe set up
+def initalize():
   conn = db.create_database(DB_NAME)
   cursor = conn.cursor()
 
@@ -151,18 +159,22 @@ def main():
   cursor.execute(statement)
   data = cursor.fetchall()
 
+  #Create a net value column
   df = pd.read_sql_query(statement,conn)
   df = df.fillna(0)
   df['net'] = df['credit'] - df['debit']
 
-  #Starting value, i.e. the account balance before 
   #our first transaction stored in the database
   start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
   df['current'] = fetch_current(df,start)
   
+  #Prevent overlaps on our graph
   df['date'] = adjust_dates(df)
 
-  return plot_by_date(df)
+  return df
+
+
+
 
 
 
