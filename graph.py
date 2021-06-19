@@ -3,6 +3,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 from pandas.core.frame import DataFrame
 import db_create as db
+from datetime import date
 
 import plotly.offline as py
 import plotly.graph_objects as go
@@ -80,6 +81,23 @@ def update_date_list(L,count,current):
   return L
 
 
+#Truncate information not needed from the date
+#up till the date part inputed inclusive
+# y = year, m = month, d = day
+def truncate_date(D,typ):
+  temp = []
+  for _, row in D.iterrows():
+    if typ == 'y':
+      temp.append(row['date'][:4])
+    elif typ == 'm':
+      temp.append(row['date'][:7])
+    else:
+      temp.append(row['date'][:10])
+
+  D['date'] = temp
+  return D
+
+
 #Configure X axis and rangeslider
 def set_fig_x_axis(figure,C,L,S,mode):
   config = []
@@ -145,6 +163,50 @@ def balance_plot(D):
   )
 
   div_output = py.plot(fig,include_plotlyjs=False, output_type='div',config=dict(responsive=True))
+
+  return div_output
+  
+
+
+
+
+def specalized_plot(D,typ):
+
+  #Obtain a new dataframe to only show year and month in date variable
+  M_DF = truncate_date(D.copy(),'m')
+  cur_date = M_DF['date'][0]
+  cur_debit = cur_credit = 0
+  raw = []
+  for _, row in M_DF.iterrows():
+    if row['date'] == cur_date:
+      cur_debit += row['debit']
+      cur_credit += row['credit']
+    else:
+      raw.append(dict(date=cur_date,debit=round(cur_debit,2),credit=round(cur_credit,2)))
+      cur_date, cur_debit, cur_credit = row['date'], row['debit'], row['credit']
+
+  #Final date will not be covered in the above loop
+  raw.append(dict(date=cur_date,debit=round(cur_debit,2),credit=round(cur_credit,2)))
+
+  monthDF = pd.DataFrame(raw)
+  monthDF['net'] = monthDF['credit'] - monthDF['debit']
+  
+
+
+
+  fig=go.Figure()
+  fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ]))
+    #mode='markers', line=dict(width=3,color='#FF0000'), name='Debits'))
+
+  fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
+    height=700,
+    title=dict(text=typ.upper() + ' HISTORY',x=0.5,y=1,xanchor='center',yanchor='top'),
+    yaxis_title=dict(text='Dollars',standoff=10),
+    font=dict(family="Lucida Bright, monospace",size=13)
+  )
+
+  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',
+    config=dict(responsive=True))
 
   return div_output
 

@@ -14,7 +14,12 @@ def home():
 
 @app.route('/debit')
 def debit():
-  pl = g.balance_graph()
+  pl = g.specalized_plot(DF,'debit')
+  return render_template("index.html",plot=pl)
+
+@app.route('/credit')
+def credit():
+  pl = g.specalized_plot(DF,'credit')
   return render_template("index.html",plot=pl)
 
 
