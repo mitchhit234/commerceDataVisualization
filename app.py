@@ -22,6 +22,11 @@ def credit():
   pl = g.specalized_plot(DF,'credit')
   return render_template("index.html",plot=pl)
 
+@app.route('/net')
+def net():
+  pl = g.specalized_plot(DF,'net')
+  return render_template("index.html",plot=pl)
+
 
 if __name__ == "__main__":
   app.run(debug=True)

@@ -169,7 +169,7 @@ def balance_plot(D):
 
 
 
-
+#Pass type credit, debit, or net for accompying graph
 def specalized_plot(D,typ):
 
   #Obtain a new dataframe to only show year and month in date variable
@@ -188,15 +188,38 @@ def specalized_plot(D,typ):
   #Final date will not be covered in the above loop
   raw.append(dict(date=cur_date,debit=round(cur_debit,2),credit=round(cur_credit,2)))
 
+  #Conver our list of dictionaries to a dataframe, add
+  #a net balance column
   monthDF = pd.DataFrame(raw)
   monthDF['net'] = monthDF['credit'] - monthDF['debit']
   
 
+  #Bar Graph color handling
+  green = '#32CD32'
+  red = '#FF0000'
+
+  if typ == 'credit':
+    cl = green
+  elif typ == 'debit':
+    cl = red
+
+  if typ == 'net': 
+    colors = []
+    for _, row in monthDF.iterrows():
+      if row['net'] < 0:
+        colors.append(red)
+      else:
+        colors.append(green)
+    monthDF['color'] = colors
+  else:
+    monthDF['color'] = cl
+
 
 
   fig=go.Figure()
-  fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ]))
-    #mode='markers', line=dict(width=3,color='#FF0000'), name='Debits'))
+  fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
+    marker=dict(color=monthDF['color'])))
+    
 
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     height=700,
