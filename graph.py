@@ -99,20 +99,25 @@ def truncate_date(D,typ):
 
 
 #Configure X axis and rangeslider
-def set_fig_x_axis(figure,C,L,S,mode):
+def set_fig_x_axis(figure,C,L,S,mode,slide):
   config = []
   for c, l, s in zip(C,L,S):
-    temp = dict(count=c,label=l,step=s,stepmode=mode)
+    temp = mode
+    if l == "YTD":
+      temp = "todate"
+    temp = dict(count=c,label=l,step=s,stepmode=temp)
     config.append(temp)
 
   config.append(dict(step="all"))
+
+
 
   figure.update_layout(
     xaxis=dict(
       rangeselector=dict(
         buttons=config,font=dict(size=11)),
       rangeslider=dict(
-        visible=True
+        visible=slide
       ),
       type="date"
     )
@@ -151,7 +156,7 @@ def balance_plot(D):
   steps = ["day", "day", "month", "month", "year", "year"]
   stepmode = "backward"
 
-  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode)
+  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,True)
 
   #Set div settings for margin, backround, and height
   #Can't find a way to have the height fit to parent div
@@ -219,6 +224,13 @@ def specalized_plot(D,typ):
   fig=go.Figure()
   fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
     marker=dict(color=monthDF['color'])))
+
+  counts = [6, 1, 5]
+  labels = ["6 Months", "Year", "5 Years"]
+  steps = ["month", "year", "year"]
+  stepmode = "backward"
+
+  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
     
 
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
