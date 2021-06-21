@@ -148,7 +148,7 @@ def balance_plot(D):
   #Figure containing net account balance
   fig = go.Figure()
   fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', 
-    line=dict(width=3,color="#03DA00"), name='Current Balance'))
+    line=dict(width=3,color="#03DA00"), name='Current Balance', customdata=D['description']))
   
   #Configure variables for graph X axis
   counts = [1, 7, 1, 6, 1, 1]
@@ -237,7 +237,8 @@ def specalized_plot(D,typ):
     height=700,
     title=dict(text=typ.upper() + ' HISTORY',x=0.5,y=1,xanchor='center',yanchor='top'),
     yaxis_title=dict(text='Dollars',standoff=10),
-    font=dict(family="Lucida Bright, monospace",size=13)
+    font=dict(family="Lucida Bright, monospace",size=13),
+    hovermode='x'
   )
 
   div_output = py.plot(fig,include_plotlyjs=False, output_type='div',
