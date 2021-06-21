@@ -8,6 +8,7 @@ from datetime import date
 import plotly.offline as py
 import plotly.graph_objects as go
 import pandas as pd
+import plotly.express as px
 
 
 
@@ -145,10 +146,22 @@ def balance_plot(D):
   #       m = 'lines'
   #     fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
 
+  colors = []
+  for _,row in D.iterrows():
+    if row['net'] > 0:
+      colors.append('#00ff00')
+    else:
+      colors.append('#ff0000')
+
+  D['colors'] = colors
+
   #Figure containing net account balance
   fig = go.Figure()
-  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', 
-    line=dict(width=3,color="#03DA00"), name='Current Balance', customdata=D['description']))
+  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', line=dict(width=3,color=colors),
+   text=D['description'],hovertemplate="<br>".join(['Account Balance: %{y}', 'Date: %{x}', 'Transaction: %{text}'])+'<extra></extra>'))
+
+  #fig = px.line(D, x='date', y='current')
+
   
   #Configure variables for graph X axis
   counts = [1, 7, 1, 6, 1, 1]
@@ -156,7 +169,7 @@ def balance_plot(D):
   steps = ["day", "day", "month", "month", "year", "year"]
   stepmode = "backward"
 
-  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,True)
+  fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
 
   #Set div settings for margin, backround, and height
   #Can't find a way to have the height fit to parent div
