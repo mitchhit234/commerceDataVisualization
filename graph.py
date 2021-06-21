@@ -156,11 +156,13 @@ def balance_plot(D):
   D['colors'] = colors
 
   #Figure containing net account balance
-  fig = go.Figure()
-  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', line=dict(width=3,color=colors),
-   text=D['description'],hovertemplate="<br>".join(['Account Balance: %{y}', 'Date: %{x}', 'Transaction: %{text}'])+'<extra></extra>'))
+  # fig = go.Figure()
+  # fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', line=dict(width=3),
+  #  text=D['description'],hovertemplate="<br>".join(['Account Balance: %{y}', 'Date: %{x}', 'Transaction: %{text}'])+'<extra></extra>'))
 
-  #fig = px.line(D, x='date', y='current')
+
+  fig = go.FigureWidget([go.Scatter(x=D['date'], y=D['current'], mode='lines')])
+
 
   
   #Configure variables for graph X axis
