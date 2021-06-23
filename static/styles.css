@@ -1,6 +1,6 @@
 .grid-row-container {
   display: grid;
-  grid-template-rows: 1fr 10fr;
+  grid-template-rows: 1fr 12fr;
   grid-gap: 20px;
   margin: 20px;
 }
@@ -10,5 +10,21 @@
   display: grid;
   grid-template-columns: 1.8fr 1fr;
   grid-gap: 20px;
-  height: 80vh;
+  height: 85vh;
+}
+
+
+.grid-col-child {
+  height: 100%;
+}
+
+.nav-link{
+  font-size: 110%;
+}
+
+.navbar-brand{
+  font-size: 125%;
+  position: absolute;
+  left: 45%;
+  display: block;
 }
