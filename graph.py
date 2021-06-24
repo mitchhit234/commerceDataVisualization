@@ -23,6 +23,7 @@ CURRENT_VALUE = 3133.91
 
 
 
+
 #Template for returning a plot object
 def generate_plot(X,Y,x_label,y_label,title):
   plt.plot(X,Y)
@@ -97,6 +98,29 @@ def truncate_date(D,typ):
 
   D['date'] = temp
   return D
+
+
+#Remove redundant information for simple presentation
+#Normal description will still be avaliable to user
+#via click actions
+def summarize_desc(D):
+  redundant_sub = ['CREDIT', 'DEBIT', 'CARD', 'PURCHASE', 'TRACE', 'RECURRING', 'PAYMENT', 'NO:']
+  redundant_full = ['NO', 'ACH', '*', '-']
+
+  temp = []
+  for _, row in D.iterrows():
+    raw = row['description'].split(' ')
+    new = ''
+    for i in raw:
+      i = i.upper()
+      if i not in redundant_full:
+        if not any(j in i for j in redundant_sub):
+          if not any(x.isdigit() for x in i):
+            new += i + ' '
+    temp.append(new)
+
+  return temp
+  
 
 
 #Configure X axis and rangeslider
@@ -291,7 +315,23 @@ def initalize():
   return df
 
 
+def basic_df():
+  conn = db.create_database(DB_NAME)
+  cursor = conn.cursor()
+
+  #Fetch all current data
+  statement = "SELECT * FROM " + TABLE_NAME + " ORDER BY num"
+  cursor.execute(statement)
+  data = cursor.fetchall()
+
+  #Create a net value column
+  df = pd.read_sql_query(statement,conn)
+  df = df.fillna(0)
+  
+  df['net'] = df['credit'] - df['debit']
+  pd.options.display.float_format = "{:.2f}".format
+
+  df['description'] = summarize_desc(df)
 
 
-
-
+  return df

@@ -1,8 +1,16 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from numpy.core.getlimits import _discovered_machar
+import dash_table
+from dash_table.Format import Format, Group, Scheme, Symbol
 
-def render_template(fig):
+
+
+def render_template(fig,df):
+  
+  df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
+  df = df.drop(columns=['num', 'debit', 'credit'])
+  df = df.iloc[::-1]
+
   layout = html.Div([ 
     dcc.Location(id='url', refresh=False),
     html.Div(
@@ -116,7 +124,15 @@ def render_template(fig):
                 ),
                 html.Div(
                   className='grid-col-child',
-                  children='Grid column 2'
+                  children=[
+                    dash_table.DataTable(
+                      id='table',
+                      columns=[{"name": i, "id": i} for i in df.columns],
+                      data=df.to_dict('records'),
+                      fixed_rows={'headers': True},
+                      style_table={'height': 1200}
+                    )
+                  ]
                 )
               ]
             )

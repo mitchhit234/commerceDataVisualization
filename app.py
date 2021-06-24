@@ -12,11 +12,12 @@ css = [dbc.themes.BOOTSTRAP, 'static/styles.css']
 app = dash.Dash(__name__, external_stylesheets=css)
 
 df = gp.initalize()
+df2 = gp.basic_df()
 
 
 #Inital page
 fig = gp.balance_plot(df)
-app.layout = t.render_template(fig)
+app.layout = t.render_template(fig,df2)
 
 @app.callback(Output('figure-content', 'figure'),
   [Input('url', 'pathname')]
