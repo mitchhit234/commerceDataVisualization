@@ -176,11 +176,13 @@ def balance_plot(D):
   #Set div settings for margin, backround, and height
   #Can't find a way to have the height fit to parent div
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
-    height=700,
+    #height=700,
     title=dict(text='ACCOUNT BALANCE',x=0.5,y=1,xanchor='center',yanchor='top'),
     yaxis_title=dict(text='Dollars',standoff=10),
     font=dict(family="Lucida Bright, monospace",size=13)
   )
+
+  return fig
 
   div_output = py.plot(fig,include_plotlyjs=False, output_type='div',config=dict(responsive=True))
 
@@ -220,7 +222,7 @@ def specalized_plot(D,typ):
 
   if typ == 'credit':
     cl = green
-  elif typ == 'debit':
+  else:
     cl = red
 
   if typ == 'net': 
@@ -255,6 +257,8 @@ def specalized_plot(D,typ):
     font=dict(family="Lucida Bright, monospace",size=13),
     hovermode='x'
   )
+
+  return fig
 
   div_output = py.plot(fig,include_plotlyjs=False, output_type='div',
     config=dict(responsive=True))
