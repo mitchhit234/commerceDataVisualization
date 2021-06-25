@@ -128,20 +128,20 @@ def render_template(fig,df):
                       data=df.to_dict('records'),
                       fixed_rows={'headers': True},
                       style_cell={
-                        'overflow': 'hidden',
                         'textOverflow': 'ellipsis',
-                        'maxWidth': 500,
+                        'maxWidth': 400,
                         'textAlign': 'left'
                       },
                       style_cell_conditional=[
                         {
-                          'if': {'column_id': 'NET'},
-                          'textAlign': 'right'
+                          'if': {'column_id': 'CURRENT'},
+                          'textAlign': 'right',
+                          'width': 100
                         }
                       ],
                       sort_action='custom',
                       sort_mode='single',
-                      sort_by=[]
+                      sort_by=[],
                     )
                   ]
                 )

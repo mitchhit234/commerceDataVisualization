@@ -300,17 +300,6 @@ def specalized_plot(D,typ):
 
 
 
-def main_plot_df(df):
-  #our first transaction stored in the database
-  start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
-  df['current'] = fetch_current(df,start)
-  
-  #Prevent overlaps on our graph
-  df['date'] = adjust_dates(df)
-
-  return df
-
-
 def table_df(df,cols_to_discard):
   #Drop all columns we dont want to show
   df = df.drop(columns=cols_to_discard)
@@ -319,15 +308,8 @@ def table_df(df,cols_to_discard):
   if 'description' not in cols_to_discard:
     df['description'] = summarize_desc(df)
 
-  #Make sure float values maintain their format
-  #by translating them to strings
-  #df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
-
   #Present transactions from newset to oldes
   df = df.iloc[::-1]
-
-  #Provide typed out date instead of numeric date format
-  #df['date'] = worded_date(df)
 
   #Capitilize column names for better apperance
   df.columns = df.columns.str.upper()
@@ -346,5 +328,12 @@ def initalize():
   df = pd.read_sql_query(statement,conn)
   df = df.fillna(0)
   df['net'] = df['credit'] - df['debit']
+
+  #our first transaction stored in the database
+  start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
+  df['current'] = fetch_current(df,start)
+  
+  #Prevent overlaps on our graph
+  df['date'] = adjust_dates(df)
 
   return df

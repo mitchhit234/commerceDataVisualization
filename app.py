@@ -18,12 +18,13 @@ df = gp.initalize()
 #We use different data frames for the different plots,
 #for example we have a current column for the plot,
 #and we delete columns from the table df and alter description
-plot_df = gp.main_plot_df(df.copy())
-table_df = gp.table_df(df.copy(),['num','credit','debit'])
+#plot_df = gp.main_plot_df(df.copy())
+
+table_df = gp.table_df(df.copy(),['num','credit','debit','net'])
 
 
 #Inital page
-fig = gp.balance_plot(plot_df)
+fig = gp.balance_plot(df)
 app.layout = t.render_template(fig,table_df)
 
 
@@ -56,10 +57,10 @@ def toggle_page(pathname):
 
   #Three valid tabs
   if pathname == 'debit' or pathname == 'credit' or pathname == 'net':
-    fig = gp.specalized_plot(plot_df,pathname)
+    fig = gp.specalized_plot(df,pathname)
   #Home page case or case when invalid url is entered
   else:
-    fig = gp.balance_plot(plot_df)
+    fig = gp.balance_plot(df)
 
   return fig
 
