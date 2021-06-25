@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 
 import graph as gp
 import template as t
+import pandas as pd
 
 
 
@@ -25,7 +26,26 @@ table_df = gp.table_df(df.copy(),['num','credit','debit'])
 fig = gp.balance_plot(plot_df)
 app.layout = t.render_template(fig,table_df)
 
-@app.callback(Output('figure-content', 'figure'),
+
+@app.callback(
+  Output('table-sorting','data'),
+  [Input('table-sorting', 'sort_by')]
+)
+def update_table(sort_by):
+  dff = table_df.copy()
+  if len(sort_by):
+    dff = dff.sort_values(
+      sort_by[0]['column_id'],
+      ascending=sort_by[0]['direction'] == 'asc',
+      inplace=False
+    )
+
+  return gp.format_dict_for_table(dff)
+
+
+
+@app.callback(
+  Output('figure-content', 'figure'),
   [Input('url', 'pathname')]
 )
 def toggle_page(pathname):

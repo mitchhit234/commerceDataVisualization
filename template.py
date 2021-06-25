@@ -2,6 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 from dash_table.Format import Format, Group, Scheme, Symbol
+import graph as gp
 
 
 
@@ -122,6 +123,7 @@ def render_template(fig,df):
                   children=[
                     'Transaction Table',
                     dash_table.DataTable(
+                      id='table-sorting',
                       columns=[{"name": i, "id": i} for i in df.columns],
                       data=df.to_dict('records'),
                       fixed_rows={'headers': True},
@@ -136,7 +138,10 @@ def render_template(fig,df):
                           'if': {'column_id': 'NET'},
                           'textAlign': 'right'
                         }
-                      ]
+                      ],
+                      sort_action='custom',
+                      sort_mode='single',
+                      sort_by=[]
                     )
                   ]
                 )

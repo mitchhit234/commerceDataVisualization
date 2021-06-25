@@ -16,10 +16,10 @@ import plotly.express as px
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Will change this to an input later
-CURRENT_VALUE = 3133.91
+CURRENT_VALUE = 4733.20
 
 #Keep float numbers in currency format
-pd.options.display.float_format = "{:.2f}".format
+pd.options.display.float_format = "${:.2f}".format
 
 
 #Template for returning a plot object
@@ -71,12 +71,36 @@ def adjust_dates(D):
   return ret
   
 
+#Convert float columns to 2 decimal string to 
+#ensure they uphold the currency format
+def format_dict_for_table(D):
+  D['DATE'] = worded_date(D)
+  for i in D.columns:
+    if D[i].dtypes == 'float':
+      D[i] = D[i].apply(lambda x: "{:.2f}".format(x))
+  return D.to_dict('records')
+
+
+#When dataframe is transfered to a dict,
+#we lose our float formatting, so we have
+#to reinitalize it for each float
+def prepare_dict(D):
+  dont_convert = ['DATE', 'NUM', 'DESCRIPTION']
+  ret = D.to_dict('records')
+  for i in range(len(ret)):
+    for key in ret[i]:
+      if key.upper() not in dont_convert:
+        ret[i][key] = ret[i][key].format(ret[i][key], '.2f')
+  return ret
+      
+
+
 
 def worded_date(D):
   temp = []
   for _,d in D.iterrows():
-    row = d['date']
-    temp.append(date(year=int(row[:4]), month=int(row[5:7]), day=int(row[8:10])).strftime('%B %d %Y'))
+    row = d['DATE']
+    temp.append(date(year=int(row[:4]), month=int(row[5:7]), day=int(row[8:10])).strftime('%b %d %Y'))
   return temp
 
 
@@ -175,7 +199,9 @@ def balance_plot(D):
 
   D['colors'] = colors
 
-  fig = go.FigureWidget([go.Scatter(x=D['date'], y=D['current'], mode='lines')])
+
+  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['current'], mode='lines',hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
+
 
   #Configure variables for graph X axis
   counts = [1, 7, 1, 6, 1, 1]
@@ -190,11 +216,11 @@ def balance_plot(D):
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     #height=700,
     title=dict(text='ACCOUNT BALANCE \n',x=0.5,y=1,xanchor='center',yanchor='top'),
-    yaxis_title=dict(text='Dollars',standoff=10),
     font=dict(family="Lucida Bright, monospace",size=14)
   )
 
-  fig.update_layout(title_text='Your title', title_x=0.5)
+  fig.update_layout(yaxis_tickformat = '$')
+  #fig.update_layout(title_text='Your title', title_y=1.1)
 
 
   return fig
@@ -251,7 +277,8 @@ def specalized_plot(D,typ):
 
   fig=go.Figure()
   fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
-    marker=dict(color=monthDF['color'])))
+    marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
+
 
   counts = [6, 1, 5]
   labels = ["6 Months", "Year", "5 Years"]
@@ -264,10 +291,10 @@ def specalized_plot(D,typ):
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     height=700,
     title=dict(text=typ.upper() + ' HISTORY',x=0.5,y=1,xanchor='center',yanchor='top'),
-    yaxis_title=dict(text='Dollars',standoff=10),
-    font=dict(family="Lucida Bright, monospace",size=13),
-    hovermode='x'
+    font=dict(family="Lucida Bright, monospace",size=13)
   )
+
+  fig.update_layout(yaxis_tickformat = '$')
 
   return fig
 
@@ -294,13 +321,13 @@ def table_df(df,cols_to_discard):
 
   #Make sure float values maintain their format
   #by translating them to strings
-  df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
+  #df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
 
   #Present transactions from newset to oldes
   df = df.iloc[::-1]
 
   #Provide typed out date instead of numeric date format
-  df['date'] = worded_date(df)
+  #df['date'] = worded_date(df)
 
   #Capitilize column names for better apperance
   df.columns = df.columns.str.upper()
