@@ -12,16 +12,14 @@ import plotly.express as px
 
 
 
-
-
-
 #Default filenames, change as needed
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Will change this to an input later
 CURRENT_VALUE = 3133.91
 
-
+#Keep float numbers in currency format
+pd.options.display.float_format = "{:.2f}".format
 
 
 #Template for returning a plot object
@@ -72,6 +70,15 @@ def adjust_dates(D):
   update_date_list(ret,count,current)
   return ret
   
+
+
+def worded_date(D):
+  temp = []
+  for _,d in D.iterrows():
+    row = d['date']
+    temp.append(date(year=int(row[:4]), month=int(row[5:7]), day=int(row[8:10])).strftime('%B %d %Y'))
+  return temp
+
 
 #Inserts dates in order of occurence into our
 #eventual new date column
@@ -140,7 +147,7 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
   figure.update_layout(
     xaxis=dict(
       rangeselector=dict(
-        buttons=config,font=dict(size=11)),
+        buttons=config,font=dict(size=14)),
       rangeslider=dict(
         visible=slide
       ),
@@ -159,17 +166,6 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
 #and the starting balance before those transactions
 def balance_plot(D):
   #Make credit and debit price charts format nicer
-  # D.replace(to_replace=[0], value=np.nan, inplace=True)
-
-  #Figure containing lines for debit, credit, and net account balance
-  # fig = go.Figure()
-  # for col in D.columns[3:]:
-  #   if col != 'net':
-  #     m = 'markers'
-  #     if col == 'current':
-  #       m = 'lines'
-  #     fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
-
   colors = []
   for _,row in D.iterrows():
     if row['net'] > 0:
@@ -179,16 +175,8 @@ def balance_plot(D):
 
   D['colors'] = colors
 
-  #Figure containing net account balance
-  # fig = go.Figure()
-  # fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', line=dict(width=3),
-  #  text=D['description'],hovertemplate="<br>".join(['Account Balance: %{y}', 'Date: %{x}', 'Transaction: %{text}'])+'<extra></extra>'))
-
-
   fig = go.FigureWidget([go.Scatter(x=D['date'], y=D['current'], mode='lines')])
 
-
-  
   #Configure variables for graph X axis
   counts = [1, 7, 1, 6, 1, 1]
   labels = ["Day", "Week", "Month", "6 Months", "YTD", "Year"]
@@ -201,17 +189,16 @@ def balance_plot(D):
   #Can't find a way to have the height fit to parent div
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     #height=700,
-    title=dict(text='ACCOUNT BALANCE',x=0.5,y=1,xanchor='center',yanchor='top'),
+    title=dict(text='ACCOUNT BALANCE \n',x=0.5,y=1,xanchor='center',yanchor='top'),
     yaxis_title=dict(text='Dollars',standoff=10),
-    font=dict(family="Lucida Bright, monospace",size=13)
+    font=dict(family="Lucida Bright, monospace",size=14)
   )
+
+  fig.update_layout(title_text='Your title', title_x=0.5)
+
 
   return fig
 
-  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',config=dict(responsive=True))
-
-  return div_output
-  
 
 
 
@@ -284,27 +271,9 @@ def specalized_plot(D,typ):
 
   return fig
 
-  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',
-    config=dict(responsive=True))
-
-  return div_output
 
 
-#Read from our DB and get our dataframe set up
-def initalize():
-  conn = db.create_database(DB_NAME)
-  cursor = conn.cursor()
-
-  #Fetch all current data
-  statement = "SELECT * FROM " + TABLE_NAME + " ORDER BY num"
-  cursor.execute(statement)
-  data = cursor.fetchall()
-
-  #Create a net value column
-  df = pd.read_sql_query(statement,conn)
-  df = df.fillna(0)
-  df['net'] = df['credit'] - df['debit']
-
+def main_plot_df(df):
   #our first transaction stored in the database
   start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
   df['current'] = fetch_current(df,start)
@@ -315,23 +284,40 @@ def initalize():
   return df
 
 
-def basic_df():
+def table_df(df,cols_to_discard):
+  #Drop all columns we dont want to show
+  df = df.drop(columns=cols_to_discard)
+
+  #Condense description information
+  if 'description' not in cols_to_discard:
+    df['description'] = summarize_desc(df)
+
+  #Make sure float values maintain their format
+  #by translating them to strings
+  df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
+
+  #Present transactions from newset to oldes
+  df = df.iloc[::-1]
+
+  #Provide typed out date instead of numeric date format
+  df['date'] = worded_date(df)
+
+  #Capitilize column names for better apperance
+  df.columns = df.columns.str.upper()
+
+  return df
+
+
+#Read from our DB and get our dataframe set up
+def initalize():
   conn = db.create_database(DB_NAME)
-  cursor = conn.cursor()
 
   #Fetch all current data
   statement = "SELECT * FROM " + TABLE_NAME + " ORDER BY num"
-  cursor.execute(statement)
-  data = cursor.fetchall()
 
   #Create a net value column
   df = pd.read_sql_query(statement,conn)
   df = df.fillna(0)
-  
   df['net'] = df['credit'] - df['debit']
-  pd.options.display.float_format = "{:.2f}".format
-
-  df['description'] = summarize_desc(df)
-
 
   return df

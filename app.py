@@ -11,13 +11,19 @@ css = [dbc.themes.BOOTSTRAP, 'static/styles.css']
 
 app = dash.Dash(__name__, external_stylesheets=css)
 
+#Base df with all the DB columns + net value
 df = gp.initalize()
-df2 = gp.basic_df()
+
+#We use different data frames for the different plots,
+#for example we have a current column for the plot,
+#and we delete columns from the table df and alter description
+plot_df = gp.main_plot_df(df.copy())
+table_df = gp.table_df(df.copy(),['num','credit','debit'])
 
 
 #Inital page
-fig = gp.balance_plot(df)
-app.layout = t.render_template(fig,df2)
+fig = gp.balance_plot(plot_df)
+app.layout = t.render_template(fig,table_df)
 
 @app.callback(Output('figure-content', 'figure'),
   [Input('url', 'pathname')]
@@ -30,20 +36,13 @@ def toggle_page(pathname):
 
   #Three valid tabs
   if pathname == 'debit' or pathname == 'credit' or pathname == 'net':
-    fig = gp.specalized_plot(df,pathname)
+    fig = gp.specalized_plot(plot_df,pathname)
   #Home page case or case when invalid url is entered
   else:
-    fig = gp.balance_plot(df)
+    fig = gp.balance_plot(plot_df)
 
   return fig
-  
 
-
-# html.Div([
-#   dcc.Graph(
-#     id='main',
-#     figure=fig
-#   )])
 
 
 if __name__ == '__main__':

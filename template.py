@@ -6,11 +6,6 @@ from dash_table.Format import Format, Group, Scheme, Symbol
 
 
 def render_template(fig,df):
-  
-  df['net'] = df['net'].apply(lambda x: "{:.2f}".format(x))
-  df = df.drop(columns=['num', 'debit', 'credit'])
-  df = df.iloc[::-1]
-
   layout = html.Div([ 
     dcc.Location(id='url', refresh=False),
     html.Div(
@@ -114,23 +109,34 @@ def render_template(fig,df):
               className='grid-col-container',
               children=[
                 html.Div(
-                  className='grid-col-child',
+                  className='grid-col-child graph',
                   children=dcc.Graph(
                     id='figure-content',
                     figure=fig,
-                    style=dict(width='100%',height='100%'),
+                    style=dict(width='95%',height='95%'),
                     responsive=True    
                   )
                 ),
                 html.Div(
-                  className='grid-col-child',
+                  className='grid-col-child dash-table',
                   children=[
+                    'Transaction Table',
                     dash_table.DataTable(
-                      id='table',
                       columns=[{"name": i, "id": i} for i in df.columns],
                       data=df.to_dict('records'),
                       fixed_rows={'headers': True},
-                      style_table={'height': 1200}
+                      style_cell={
+                        'overflow': 'hidden',
+                        'textOverflow': 'ellipsis',
+                        'maxWidth': 500,
+                        'textAlign': 'left'
+                      },
+                      style_cell_conditional=[
+                        {
+                          'if': {'column_id': 'NET'},
+                          'textAlign': 'right'
+                        }
+                      ]
                     )
                   ]
                 )

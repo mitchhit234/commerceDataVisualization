@@ -1,3 +1,8 @@
+html, body {
+  max-height: 100%;
+  overflow-y: hidden;
+} 
+
 .grid-row-container {
   display: grid;
   grid-template-rows: 1fr 12fr;
@@ -10,7 +15,8 @@
   display: grid;
   grid-template-columns: 1.8fr 1fr;
   grid-gap: 20px;
-  height: 85vh;
+  height: 80vh;
+  margin-top: 3vh;
 }
 
 
@@ -27,4 +33,19 @@
   position: absolute;
   left: 45%;
   display: block;
+}
+
+.dash-table {
+  text-align: center;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 1024px) {
+  .dash-table {
+    display: none;
+  }
+
+  .grid-col-container{
+    grid-template-columns: 1fr 0fr;
+  }
 }
