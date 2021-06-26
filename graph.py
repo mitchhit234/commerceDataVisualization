@@ -74,10 +74,12 @@ def adjust_dates(D):
 #Convert float columns to 2 decimal string to 
 #ensure they uphold the currency format
 def format_dict_for_table(D):
-  D['DATE'] = worded_date(D)
+  #D['DATE'] = worded_date(D)
   for i in D.columns:
     if D[i].dtypes == 'float':
       D[i] = D[i].apply(lambda x: "{:.2f}".format(x))
+    elif i.upper() == 'DATE':
+      D[i] = worded_date(D)
   return D.to_dict('records')
 
 
@@ -94,6 +96,17 @@ def prepare_dict(D):
   return ret
       
 
+def grab_base_and_col(D,col_name):
+  if len(col_name) < 2:
+    col_name = 'CURRENT'
+  base = ['DATE', 'DESCRIPTION', col_name.upper()]
+  to_drop = []
+  for i in D.columns:
+    if i.upper() not in base:
+      to_drop.append(i)
+
+  D = D.drop(columns=to_drop)
+  return D
 
 
 def worded_date(D):
@@ -333,7 +346,4 @@ def initalize():
   start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
   df['current'] = fetch_current(df,start)
   
-  #Prevent overlaps on our graph
-  df['date'] = adjust_dates(df)
-
   return df

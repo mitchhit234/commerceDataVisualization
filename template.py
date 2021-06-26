@@ -137,6 +137,21 @@ def render_template(fig,df):
                           'if': {'column_id': 'CURRENT'},
                           'textAlign': 'right',
                           'width': 100
+                        },
+                        {
+                          'if': {'column_id': 'NET'},
+                          'textAlign': 'right',
+                          'width': 100
+                        },
+                        {
+                          'if': {'column_id': 'CREDIT'},
+                          'textAlign': 'right',
+                          'width': 100
+                        },
+                        {
+                          'if': {'column_id': 'DEBIT'},
+                          'textAlign': 'right',
+                          'width': 100
                         }
                       ],
                       sort_action='custom',
