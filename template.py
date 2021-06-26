@@ -125,7 +125,7 @@ def render_template(fig,df):
                     dash_table.DataTable(
                       id='table-sorting',
                       columns=[{"name": i, "id": i} for i in df.columns],
-                      data=df.to_dict('records'),
+                      data=gp.format_dict_for_table(df),
                       fixed_rows={'headers': True},
                       style_cell={
                         'textOverflow': 'ellipsis',
