@@ -134,7 +134,7 @@ def render_template(fig,df):
                       },
                       style_cell_conditional=[
                         {
-                          'if': {'column_id': 'CURRENT'},
+                          'if': {'column_id': 'BALANCE'},
                           'textAlign': 'right',
                           'width': 100
                         },

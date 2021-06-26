@@ -16,7 +16,7 @@ import plotly.express as px
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Will change this to an input later
-CURRENT_VALUE = 4733.20
+BALANCE_VALUE = 4733.20
 
 #Keep float numbers in currency format
 pd.options.display.float_format = "${:.2f}".format
@@ -31,7 +31,7 @@ def generate_plot(X,Y,x_label,y_label,title):
   return plt
 
 
-#Given our current value, it gives our starting value
+#Given our current balance value, it gives our starting value
 #before the earliest transaction recorded
 def fetch_starting(D,current):
   for _ , row in D.iterrows():
@@ -101,7 +101,7 @@ def prepare_dict(D):
 
 def grab_base_and_col(D,col_name):
   if len(col_name) < 2:
-    col_name = 'CURRENT'
+    col_name = 'BALANCE'
   base = ['DATE', 'DESCRIPTION', col_name.upper()]
   to_drop = []
   for i in D.columns:
@@ -202,7 +202,7 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
 
 
 #Plotting transaction number against 
-#current value, given a list of transactions
+#current balance value, given a list of transactions
 #and the starting balance before those transactions
 def balance_plot(D):
   #Make credit and debit price charts format nicer
@@ -216,7 +216,7 @@ def balance_plot(D):
   D['colors'] = colors
 
 
-  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['current'], mode='lines',hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
+  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines',hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
 
 
   #Configure variables for graph X axis
@@ -346,7 +346,7 @@ def initalize():
   df['net'] = df['credit'] - df['debit']
 
   #our first transaction stored in the database
-  start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
-  df['current'] = fetch_current(df,start)
+  start = fetch_starting(df.iloc[::-1], BALANCE_VALUE)
+  df['balance'] = fetch_current(df,start)
   
   return df

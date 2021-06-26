@@ -18,7 +18,7 @@ pre_change = df.copy()
 df['date'] = gp.adjust_dates(df)
 
 #We use different data frames for the different plots,
-#for example we have a current column for the plot,
+#for example we have a balance column for the plot,
 #and we delete columns from the table df and alter description
 #plot_df = gp.main_plot_df(df.copy())
 
