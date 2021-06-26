@@ -217,9 +217,9 @@ def balance_plot(D):
 
 
   #Configure variables for graph X axis
-  counts = [1, 7, 1, 6, 1, 1]
-  labels = ["Day", "Week", "Month", "6 Months", "YTD", "Year"]
-  steps = ["day", "day", "month", "month", "year", "year"]
+  counts = [1, 7, 1, 1, 1, 5]
+  labels = ["1D", "1W", "1M", "YTD", "1Y", "5Y"]
+  steps = ["day", "day", "month", "year", "year", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
@@ -232,8 +232,8 @@ def balance_plot(D):
     font=dict(family="Lucida Bright, monospace",size=14)
   )
 
-  fig.update_layout(yaxis_tickformat = '$')
-  #fig.update_layout(title_text='Your title', title_y=1.1)
+  #fig.update_layout(yaxis_tickformat = '$')
+  fig.update_layout(title_text='ACCOUNT BALANCE', title_y=0.98)
 
 
   return fig
@@ -293,9 +293,9 @@ def specalized_plot(D,typ):
     marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
 
 
-  counts = [6, 1, 5]
-  labels = ["6 Months", "Year", "5 Years"]
-  steps = ["month", "year", "year"]
+  counts = [3, 6, 1, 5]
+  labels = ["3M", "6M", "1Y", "5Y"]
+  steps = ["month", "month", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
