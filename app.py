@@ -6,7 +6,7 @@ import graph as gp
 import template as t
 import pandas as pd
 
-
+global_pathname, global_sortby = '', []
 
 css = [dbc.themes.BOOTSTRAP, 'static/styles.css']
 
@@ -24,7 +24,6 @@ df['date'] = gp.adjust_dates(df)
 
 table_df = gp.table_df(pre_change.copy(),['num','credit','debit','net'])
 
-
 #Inital page
 fig = gp.balance_plot(df)
 app.layout = t.render_template(fig,table_df)
@@ -33,7 +32,7 @@ app.layout = t.render_template(fig,table_df)
 # @app.callback(
 #   Output('table-sorting','data'),
 #   [Input('table-sorting', 'sort_by'),
-#   Input('url', 'pathname')]
+#   Input('url', 'pathname')], prevent_initial_call=True
 # )
 # def update_table(sort_by,pathname):
 #   dff = gp.table_df(pre_change.copy(),['num','credit','debit','net'])
@@ -51,7 +50,7 @@ app.layout = t.render_template(fig,table_df)
 
 # @app.callback(
 #   Output('figure-content', 'figure'),
-#   [Input('url', 'pathname')]
+#   [Input('url', 'pathname')], prevent_initial_call=True
 # )
 # def toggle_page(pathname):
 #   #Remove '/' from tabs other than home
@@ -76,24 +75,32 @@ app.layout = t.render_template(fig,table_df)
   Output('table-sorting','data'),
   Output('table-sorting', 'columns'),
   [Input('url', 'pathname'),
-  Input('table-sorting', 'sort_by')]
+  Input('table-sorting', 'sort_by')], prevent_initial_call=True
 )
 def update_page(pathname,sort_by):
+
+  ctx = dash.callback_context
+
+  #url was changed
+  # if ctx.triggered[0]['prop_id'] == 'url.pathname':
+
+  # #table sort was changed
+  # else:
+
+
   #Remove '/' from tabs other than home
   #for function input
   if len(pathname) > 1:
     pathname = pathname[1:]
 
-  #Three valid tabs
-  if pathname == 'debit' or pathname == 'credit' or pathname == 'net':
-    fig = gp.specalized_plot(df,pathname)
-  #Home page case or case when invalid url is entered
-  else:
-    fig = gp.balance_plot(df)
 
+
+  fig = gp.specalized_plot(df,pathname)
 
   dff = gp.table_df(pre_change.copy(),[])
   dff = gp.grab_base_and_col(dff,pathname.upper())
+
+
   if len(sort_by):
     if sort_by[0]['column_id'] in dff:
       dff = dff.sort_values(
@@ -105,6 +112,68 @@ def update_page(pathname,sort_by):
   cols = [{"name": i, "id": i} for i in dff.columns]
 
   return fig, gp.format_dict_for_table(dff), cols
+
+
+
+
+
+
+
+
+
+# @app.callback(
+#   Output('table-sorting','data'),
+#   [Input('table-sorting', 'sort_by')], prevent_initial_call=True
+# )
+# def sorting_table(sort_by):
+
+#   col = sort_by[0]['column_id']
+
+#   dff = gp.table_df(pre_change.copy(),[])
+#   dff = gp.grab_base_and_col(dff,col)
+
+
+#   if len(sort_by):
+#     if sort_by[0]['column_id'] in dff:
+#       dff = dff.sort_values(
+#         sort_by[0]['column_id'],
+#         ascending=sort_by[0]['direction'] == 'asc',
+#         inplace=False
+#       )
+
+#   return gp.format_dict_for_table(dff)
+
+  
+
+
+
+
+# @app.callback(
+#   Output('figure-content', 'figure'),
+#   Output('table-sorting','data'),
+#   Output('table-sorting', 'columns'),
+#   [Input('url', 'pathname')], prevent_initial_call=True
+# )
+# def update_pg(pathname):
+
+#   ctx = dash.callback_context
+
+#   #Remove '/' from tabs other than home
+#   #for function input
+#   if len(pathname) > 1:
+#     pathname = pathname[1:]
+
+#   fig = gp.specalized_plot(df,pathname)
+  
+#   dff = gp.table_df(pre_change.copy(),[])
+#   dff = gp.grab_base_and_col(dff,pathname.upper())
+
+#   cols = [{"name": i, "id": i} for i in dff.columns]
+
+#   return fig, gp.format_dict_for_table(dff), cols
+
+
+
 
 
 

@@ -129,7 +129,7 @@ def render_template(fig,df):
                       fixed_rows={'headers': True},
                       style_cell={
                         'textOverflow': 'ellipsis',
-                        'maxWidth': 350,
+                        'maxWidth': 300,
                         'textAlign': 'left'
                       },
                       style_cell_conditional=[

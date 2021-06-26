@@ -74,16 +74,23 @@ def adjust_dates(D):
 #Convert float columns to 2 decimal string to 
 #ensure they uphold the currency format
 def format_dict_for_table(D):
-  #D['DATE'] = worded_date(D)
+  #D = D.replace(0, np.nan)
+  #D = D.dropna(how='any',axis=0)
+  float_name = ''
   for i in D.columns:
     if D[i].dtypes == 'float':
       D[i] = D[i].apply(lambda x: "{:.2f}".format(x))
-      # rows = D.loc[D[i] == '0.00']
-      # if len(rows) > 0:
-      #   D.drop(rows,inplace=True)
+      float_name = i
     elif i.upper() == 'DATE':
       D[i] = worded_date(D)
-  return D.to_dict('records')
+
+  dic = D.to_dict('records')
+  # if len(float_name) > 0:
+  #   for i in range(len(dic)-1, -1, -1):
+  #     if dic[i][float_name] == '0.00':
+  #       dic.pop(i)
+
+  return dic
 
 
 #When dataframe is transfered to a dict,
@@ -246,6 +253,10 @@ def balance_plot(D):
 
 #Pass type credit, debit, or net for accompying graph
 def specalized_plot(D,typ):
+
+  # '/' or '' page is the home page, which shoud be the balance plot
+  if len(typ) < 2:
+    return balance_plot(D)
 
   #Obtain a new dataframe to only show year and month in date variable
   M_DF = truncate_date(D.copy(),'m')
