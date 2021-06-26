@@ -78,6 +78,9 @@ def format_dict_for_table(D):
   for i in D.columns:
     if D[i].dtypes == 'float':
       D[i] = D[i].apply(lambda x: "{:.2f}".format(x))
+      # rows = D.loc[D[i] == '0.00']
+      # if len(rows) > 0:
+      #   D.drop(rows,inplace=True)
     elif i.upper() == 'DATE':
       D[i] = worded_date(D)
   return D.to_dict('records')
