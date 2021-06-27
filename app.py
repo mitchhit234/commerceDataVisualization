@@ -30,6 +30,18 @@ app.layout = t.render_template(fig,table_df)
 
 
 
+# @app.callback(
+#   Output('hover-table','data'),
+#   Input('figure-content','clickData'), prevent_initial_call=True
+# )
+# def display_hover_data(clickData):
+#   info = clickData['points'][0]
+#   new = []
+#   new.append(dict(DATE=info['x'][:10], DESCRIPTION=info['customdata'], BALANCE=round(info['y'],2)))
+#   return new
+
+
+
 
 @app.callback(
   Output('figure-content', 'figure'),

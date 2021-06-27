@@ -38,6 +38,9 @@ html, body {
 .dash-table {
   text-align: center;
   margin: 0 auto;
+  /*display: grid;
+  grid-row-gap: 20px;
+  row-gap: 20px;*/
 }
 
 

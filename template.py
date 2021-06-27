@@ -161,11 +161,51 @@ def render_template(fig,df):
                       #Prevents errors when data is small enough to actualy shorthen table size
                       #dash does not handle this well, starts infinite looping
                       style_table={
-                          'minHeight': '450px', 'height': '450px', 'maxHeight': '450px',
+                          'minHeight': '600px', 'height': '600px', 'maxHeight': '600px',
                           'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
                       },
-                    )
+                    ),
+                    # dash_table.DataTable(
+                    #   id = 'hover-table',
+                    #   style_data={
+                    #     'whiteSpace': 'normal',
+                    #     'height': 'auto',
+                    #   },
+                    #   style_cell={
+                    #     'textAlign': 'left'
+                    #   },
+                    #   style_cell_conditional=[
+                    #     {
+                    #       'if': {'column_id': 'DATE'},
+                    #       'width': 111
+                    #     },
+                    #     {
+                    #       'if': {'column_id': 'NET'},
+                    #       'width': 100
+                    #     },
+                    #     {
+                    #       'if': {'column_id': 'CREDIT'},
+                    #       'width': 100
+                    #     },
+                    #     {
+                    #       'if': {'column_id': 'DEBIT'},
+                    #       'width': 100
+                    #     },
+                    #     {
+                    #       'if': {'column_id': 'DESCRIPTION'},
+                    #       'width': 300
+                    #     },
+                    #     {
+                    #       'if': {'column_id': 'BALANCE'},
+                    #       'width': 93,
+                    #       'textAlign': 'right'
+                    #     },
+                    #   ],
+                    #   columns=[{"name": i, "id": i} for i in df.columns],
+                    #   data=[dict(DATE='',DESCRIPTION='',BALANCE='')]
+                    # )
                   ]
+
                 )
               ]
             )

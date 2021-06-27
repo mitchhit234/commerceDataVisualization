@@ -117,7 +117,7 @@ def grab_base_and_col(D,col_name):
     D = D.replace(0, np.nan)
     D = D.dropna(how='any',axis=0)
     D = D.replace(np.nan,0)
-    
+
   return D
 
 
@@ -225,7 +225,7 @@ def balance_plot(D):
   D['colors'] = colors
 
 
-  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines',hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
+  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines', customdata=D['description'],hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
 
 
   #Configure variables for graph X axis
