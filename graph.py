@@ -83,8 +83,6 @@ def format_dict_for_table(D):
 
   if len(float_col_name) > 0:
     D[float_col_name] = D[float_col_name].apply(lambda x: "{:.2f}".format(x))
-  
-
 
   return D.to_dict('records')
 
@@ -115,11 +113,11 @@ def grab_base_and_col(D,col_name):
 
   #Drop rows in which our specified
   #col values is 0
-  if col_name != 'BALANCE': #and col_name != 'CREDIT':
+  if col_name != 'BALANCE':
     D = D.replace(0, np.nan)
     D = D.dropna(how='any',axis=0)
     D = D.replace(np.nan,0)
-
+    
   return D
 
 

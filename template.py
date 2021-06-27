@@ -155,17 +155,15 @@ def render_template(fig,df):
                           'width': 100
                         },
                       ],
-                      style_data_conditional=[ 
-                        {
-                          'if': {
-                              'filter_query': '{{CREDIT}} = {}'.format('0.00'),
-                          },
-                          'visibility': 'hidden'
-                        }
-                      ],
                       sort_action='custom',
                       sort_mode='single',
                       sort_by=[],
+                      #Prevents errors when data is small enough to actualy shorthen table size
+                      #dash does not handle this well, starts infinite looping
+                      style_table={
+                          'minHeight': '450px', 'height': '450px', 'maxHeight': '450px',
+                          'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
+                      },
                     )
                   ]
                 )
