@@ -7,6 +7,7 @@ import graph as gp
 
 
 def render_template(fig,df):
+
   layout = html.Div([ 
     dcc.Location(id='url', refresh=False),
     html.Div(
@@ -152,6 +153,14 @@ def render_template(fig,df):
                           'if': {'column_id': 'DEBIT'},
                           'textAlign': 'right',
                           'width': 100
+                        },
+                      ],
+                      style_data_conditional=[ 
+                        {
+                          'if': {
+                              'filter_query': '{{CREDIT}} = {}'.format('0.00'),
+                          },
+                          'visibility': 'hidden'
                         }
                       ],
                       sort_action='custom',

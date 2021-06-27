@@ -74,23 +74,19 @@ def adjust_dates(D):
 #Convert float columns to 2 decimal string to 
 #ensure they uphold the currency format
 def format_dict_for_table(D):
-  #D = D.replace(0, np.nan)
-  #D = D.dropna(how='any',axis=0)
-  float_name = ''
+  D['DATE'] = worded_date(D)
+
+  float_col_name = ''
   for i in D.columns:
     if D[i].dtypes == 'float':
-      D[i] = D[i].apply(lambda x: "{:.2f}".format(x))
-      float_name = i
-    elif i.upper() == 'DATE':
-      D[i] = worded_date(D)
+      float_col_name = i
 
-  dic = D.to_dict('records')
-  # if len(float_name) > 0:
-  #   for i in range(len(dic)-1, -1, -1):
-  #     if dic[i][float_name] == '0.00':
-  #       dic.pop(i)
+  if len(float_col_name) > 0:
+    D[float_col_name] = D[float_col_name].apply(lambda x: "{:.2f}".format(x))
+  
 
-  return dic
+
+  return D.to_dict('records')
 
 
 #When dataframe is transfered to a dict,
@@ -111,11 +107,19 @@ def grab_base_and_col(D,col_name):
     col_name = 'BALANCE'
   base = ['DATE', 'DESCRIPTION', col_name.upper()]
   to_drop = []
+  #Drop unwanted columns
   for i in D.columns:
     if i.upper() not in base:
       to_drop.append(i)
-
   D = D.drop(columns=to_drop)
+
+  #Drop rows in which our specified
+  #col values is 0
+  if col_name != 'BALANCE' and col_name != 'CREDIT':
+    D = D.replace(0, np.nan)
+    D = D.dropna(how='any',axis=0)
+    D = D.replace(np.nan,0)
+
   return D
 
 
