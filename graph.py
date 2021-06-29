@@ -1,44 +1,57 @@
+#Functions for reading in data, creating/manipulating dataframes,
+#and creating interactive tables and graphs
 import numpy as np
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-from pandas.core.frame import DataFrame
-import db_create as db
-from datetime import date
-
-import plotly.offline as py
-import plotly.graph_objects as go
 import pandas as pd
-import plotly.express as px
-
-
-
-
+from datetime import date
+import plotly.graph_objects as go
+import db_create as db
 
 
 #Default filenames, change as needed
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
-#Will change this to an input later
-CURRENT_VALUE = 3133.91
+META_TABLE = "META"
+
+#Keep float numbers in currency format
+pd.options.display.float_format = "${:.2f}".format
 
 
-
-#Template for returning a plot object
-def generate_plot(X,Y,x_label,y_label,title):
-  plt.plot(X,Y)
-  plt.xlabel(x_label)
-  plt.ylabel(y_label)
-  plt.title(title)
-  return plt
-
-
-#Given our current value, it gives our starting value
+#Given our current balance value, it gives our starting value
 #before the earliest transaction recorded
-def fetch_starting(D,current):
+def generate_starting(D,current):
   for _ , row in D.iterrows():
     current -= row['net']
   #Round in case of floating point arithmetic getting wonky
   return round(current,2)
+
+
+
+#If the starting value has already been calculated, we fetch that,
+#otherwise we need to calculate it for balance plot rendering
+def check_for_start(D,conn):
+  statement = "SELECT balance FROM " + META_TABLE
+  start = pd.read_sql_query(statement,conn)
+  if start.empty:
+    print('Enter your current balance')
+    current = input()
+    cursor = conn.cursor()
+    start = generate_starting(D.iloc[::-1],float(current))
+    insert_meta_table(D['date'][0],start,cursor)
+    conn.commit()
+    conn.close()
+  else:
+    start = start['balance'][0]
+  return start
+
+
+
+#Insert our starting value for later retrevial into our META table
+def insert_meta_table(date,value,cur):
+  statement = 'INSERT INTO ' + META_TABLE + ' VALUES(' + f'"{date}", ' + str(value) + ')'
+  cur.execute(statement)
+
+
+
 
 #Initalize the current column
 def fetch_current(D,current):
@@ -72,6 +85,67 @@ def adjust_dates(D):
   return ret
   
 
+#Convert float columns to 2 decimal string to 
+#ensure they uphold the currency format
+def format_dict_for_table(D):
+  D['DATE'] = worded_date(D)
+
+  float_col_name = ''
+  for i in D.columns:
+    if D[i].dtypes == 'float':
+      float_col_name = i
+
+  if len(float_col_name) > 0:
+    D[float_col_name] = D[float_col_name].apply(lambda x: "{:.2f}".format(x))
+
+  return D.to_dict('records')
+
+
+#When dataframe is transfered to a dict,
+#we lose our float formatting, so we have
+#to reinitalize it for each float
+def prepare_dict(D):
+  dont_convert = ['DATE', 'NUM', 'DESCRIPTION']
+  ret = D.to_dict('records')
+  for i in range(len(ret)):
+    for key in ret[i]:
+      if key.upper() not in dont_convert:
+        ret[i][key] = ret[i][key].format(ret[i][key], '.2f')
+  return ret
+      
+
+#Grabs our base columns, date and description, plus
+#one other column corresponding to its page and href
+def grab_base_and_col(D,col_name):
+  if len(col_name) < 2:
+    col_name = 'BALANCE'
+  base = ['DATE', 'DESCRIPTION', col_name.upper()]
+  to_drop = []
+  #Drop unwanted columns
+  for i in D.columns:
+    if i.upper() not in base:
+      to_drop.append(i)
+  D = D.drop(columns=to_drop)
+
+  #Drop rows in which our specified
+  #col values is 0
+  if col_name != 'BALANCE':
+    D = D.replace(0, np.nan)
+    D = D.dropna(how='any',axis=0)
+    D = D.replace(np.nan,0)
+
+  return D
+
+#Replace date column with worded version for easier
+#table reading
+def worded_date(D):
+  temp = []
+  for _,d in D.iterrows():
+    row = d['DATE']
+    temp.append(date(year=int(row[:4]), month=int(row[5:7]), day=int(row[8:10])).strftime('%b %d %Y'))
+  return temp
+
+
 #Inserts dates in order of occurence into our
 #eventual new date column
 def update_date_list(L,count,current):
@@ -99,6 +173,29 @@ def truncate_date(D,typ):
   return D
 
 
+#Remove redundant information for simple presentation
+#Normal description will still be avaliable to user
+#via click actions
+def summarize_desc(D):
+  redundant_sub = ['CREDIT', 'DEBIT', 'CARD', 'PURCHASE', 'TRACE', 'RECURRING', 'PAYMENT', 'NO:']
+  redundant_full = ['NO', 'ACH', '*', '-']
+
+  temp = []
+  for _, row in D.iterrows():
+    raw = row['description'].split(' ')
+    new = ''
+    for i in raw:
+      i = i.upper()
+      if i not in redundant_full:
+        if not any(j in i for j in redundant_sub):
+          if not any(x.isdigit() for x in i):
+            new += i + ' '
+    temp.append(new)
+
+  return temp
+  
+
+
 #Configure X axis and rangeslider
 def set_fig_x_axis(figure,C,L,S,mode,slide):
   config = []
@@ -116,7 +213,7 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
   figure.update_layout(
     xaxis=dict(
       rangeselector=dict(
-        buttons=config,font=dict(size=11)),
+        buttons=config,font=dict(size=14)),
       rangeslider=dict(
         visible=slide
       ),
@@ -131,21 +228,10 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
 
 
 #Plotting transaction number against 
-#current value, given a list of transactions
+#current balance value, given a list of transactions
 #and the starting balance before those transactions
 def balance_plot(D):
   #Make credit and debit price charts format nicer
-  # D.replace(to_replace=[0], value=np.nan, inplace=True)
-
-  #Figure containing lines for debit, credit, and net account balance
-  # fig = go.Figure()
-  # for col in D.columns[3:]:
-  #   if col != 'net':
-  #     m = 'markers'
-  #     if col == 'current':
-  #       m = 'lines'
-  #     fig.add_trace(go.Scatter(x=D['date'], y=D[col], mode=m, name=col))
-
   colors = []
   for _,row in D.iterrows():
     if row['net'] > 0:
@@ -155,18 +241,14 @@ def balance_plot(D):
 
   D['colors'] = colors
 
-  #Figure containing net account balance
-  fig = go.Figure()
-  fig.add_trace(go.Scatter(x=D['date'], y=D['current'], mode='lines', line=dict(width=3,color=colors),
-   text=D['description'],hovertemplate="<br>".join(['Account Balance: %{y}', 'Date: %{x}', 'Transaction: %{text}'])+'<extra></extra>'))
 
-  #fig = px.line(D, x='date', y='current')
+  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines+markers', customdata=D['description'],hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
 
-  
+
   #Configure variables for graph X axis
-  counts = [1, 7, 1, 6, 1, 1]
-  labels = ["Day", "Week", "Month", "6 Months", "YTD", "Year"]
-  steps = ["day", "day", "month", "month", "year", "year"]
+  counts = [1, 6, 1, 5]
+  labels = ["1M", "6M", "1Y", "5Y"]
+  steps = ["month", "month", "year", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
@@ -174,21 +256,26 @@ def balance_plot(D):
   #Set div settings for margin, backround, and height
   #Can't find a way to have the height fit to parent div
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
-    height=700,
-    title=dict(text='ACCOUNT BALANCE',x=0.5,y=1,xanchor='center',yanchor='top'),
-    yaxis_title=dict(text='Dollars',standoff=10),
-    font=dict(family="Lucida Bright, monospace",size=13)
+    #height=700,
+    title=dict(text='ACCOUNT BALANCE \n',x=0.5,y=1,xanchor='center',yanchor='top'),
+    font=dict(family="Helvetica, Lucida Bright",size=14)
   )
 
-  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',config=dict(responsive=True))
+  #fig.update_layout(yaxis_tickformat = '$')
+  fig.update_layout(title_text='ACCOUNT BALANCE', title_y=0.98)
 
-  return div_output
-  
+
+  return fig
+
 
 
 
 #Pass type credit, debit, or net for accompying graph
 def specalized_plot(D,typ):
+
+  # '/' or '' page is the home page, which shoud be the balance plot
+  if len(typ) < 2:
+    return balance_plot(D)
 
   #Obtain a new dataframe to only show year and month in date variable
   M_DF = truncate_date(D.copy(),'m')
@@ -218,7 +305,7 @@ def specalized_plot(D,typ):
 
   if typ == 'credit':
     cl = green
-  elif typ == 'debit':
+  else:
     cl = red
 
   if typ == 'net': 
@@ -236,11 +323,12 @@ def specalized_plot(D,typ):
 
   fig=go.Figure()
   fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
-    marker=dict(color=monthDF['color'])))
+    marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
 
-  counts = [6, 1, 5]
-  labels = ["6 Months", "Year", "5 Years"]
-  steps = ["month", "year", "year"]
+
+  counts = [1, 6, 1, 5]
+  labels = ["1M", "6M", "1Y", "5Y"]
+  steps = ["month", "month", "year", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
@@ -249,43 +337,48 @@ def specalized_plot(D,typ):
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     height=700,
     title=dict(text=typ.upper() + ' HISTORY',x=0.5,y=1,xanchor='center',yanchor='top'),
-    yaxis_title=dict(text='Dollars',standoff=10),
-    font=dict(family="Lucida Bright, monospace",size=13),
-    hovermode='x'
+    font=dict(family="Helvetica, Lucida Bright",size=13)
   )
 
-  div_output = py.plot(fig,include_plotlyjs=False, output_type='div',
-    config=dict(responsive=True))
+  fig.update_layout(yaxis_tickformat = '$')
+  fig.update_layout(title_text=typ.upper() + ' HISTORY', title_y=0.98)
 
-  return div_output
+  return fig
+
+
+
+def table_df(df,cols_to_discard):
+  #Drop all columns we dont want to show
+  df = df.drop(columns=cols_to_discard)
+
+  #Condense description information
+  if 'description' not in cols_to_discard:
+    df['description'] = summarize_desc(df)
+
+  #Present transactions from newset to oldes
+  df = df.iloc[::-1]
+
+  #Capitilize column names for better apperance
+  df.columns = df.columns.str.upper()
+
+  return df
 
 
 #Read from our DB and get our dataframe set up
 def initalize():
   conn = db.create_database(DB_NAME)
-  cursor = conn.cursor()
 
   #Fetch all current data
   statement = "SELECT * FROM " + TABLE_NAME + " ORDER BY num"
-  cursor.execute(statement)
-  data = cursor.fetchall()
 
   #Create a net value column
   df = pd.read_sql_query(statement,conn)
   df = df.fillna(0)
   df['net'] = df['credit'] - df['debit']
 
-  #our first transaction stored in the database
-  start = fetch_starting(df.iloc[::-1], CURRENT_VALUE)
-  df['current'] = fetch_current(df,start)
+  #Helps generate our balance plot
+  start = check_for_start(df,conn)
+  df['balance'] = fetch_current(df,start)
   
-  #Prevent overlaps on our graph
-  df['date'] = adjust_dates(df)
-
   return df
-
-
-
-
-
 

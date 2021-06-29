@@ -1,3 +1,5 @@
+#Database creation, requires the use of the export.csv file
+#in the format provided by Commerce Bank
 import sqlite3
 from sqlite3 import Error 
 import traceback

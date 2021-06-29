@@ -1,3 +1,10 @@
+#Meant to run before every application launch
+#Will update the database based off of commerce alerts
+
+#Current known transactions commerce doesn't give alerts to (and would 
+#have to be entered manually or through the export method)
+#Transfer from another commerece account
+#Direct deposits (gives alert to action and desc, but not price)
 from api_connect import Create_Service
 from bs4 import BeautifulSoup
 import base64
@@ -40,6 +47,7 @@ def reorder_date(st):
 def clean_money(st):
   st = st.replace('$','')
   st = st.replace(' ','')
+  st = st.replace(',','')
   return st
 
 #Must match Column name as it appears in DB table
@@ -48,13 +56,14 @@ def get_max_col(cur,col_name,tbl_name):
   cur.execute(statement)
   return cur.fetchone()[0]
 
-
+#Select all the transactions from the last key (usually date)
 def get_last_transactions(cur,key,tbl_name):
   statement = "SELECT * FROM " + tbl_name + " WHERE " + key + " = "
   statement += "(SELECT MAX(" + key + ") FROM " + tbl_name + ")"
   cur.execute(statement)
   return cur.fetchall()
 
+#Prevent insertion of data already inserted in the DB
 def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
     if repeats[i][2:4] == tuple(inst[2:4]) and repeats[i][0] == inst[0].replace('"',''):
@@ -108,7 +117,7 @@ if __name__ == "__main__":
       #in the database, i.e. is this a new transaction
       if compare_dates(date.strip('"'),last_date):
         #Prepare the parsed info for an Insert Statement
-        values = [reorder_date(r[3].text), str(0), r[4].text, float(clean_money(r[5].text)), 'None']
+        values = [reorder_date(r[3].text), str(0), r[4].text, clean_money(r[5].text), 'None']
         if prevent_repeats(values,last_entries):
           values = [reorder_date(r[3].text), str(0), 
                     f'"{r[4].text}"', clean_money(r[5].text), 'NULL']         
