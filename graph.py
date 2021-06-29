@@ -241,7 +241,7 @@ def balance_plot(D):
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     #height=700,
     title=dict(text='ACCOUNT BALANCE \n',x=0.5,y=1,xanchor='center',yanchor='top'),
-    font=dict(family="Lucida Bright, monospace",size=14)
+    font=dict(family="Helvetica, Lucida Bright",size=14)
   )
 
   #fig.update_layout(yaxis_tickformat = '$')
@@ -320,10 +320,11 @@ def specalized_plot(D,typ):
   fig.update_layout(margin=dict(l=20,r=20,t=20,b=20),
     height=700,
     title=dict(text=typ.upper() + ' HISTORY',x=0.5,y=1,xanchor='center',yanchor='top'),
-    font=dict(family="Lucida Bright, monospace",size=13)
+    font=dict(family="Helvetica, Lucida Bright",size=13)
   )
 
   fig.update_layout(yaxis_tickformat = '$')
+  fig.update_layout(title_text=typ.upper() + ' HISTORY', title_y=0.98)
 
   return fig
 
