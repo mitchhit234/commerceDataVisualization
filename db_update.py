@@ -65,10 +65,15 @@ def get_last_transactions(cur,key,tbl_name):
   return cur.fetchall()
 
 #Prevent insertion of data already inserted in the DB
+#Issues could arise later here, not the best logic
 def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
-    if repeats[i][2] == inst[2]:
-      return False
+    if str(repeats[i][3]) ==  inst[3]:
+      if float(repeats[i][4]) == float(inst[4]):
+        return False
+    elif str(repeats[i][4]) == inst[4]:
+      if float(repeats[i][3]) == float(inst[3]):
+        return False
   return True
 
 
