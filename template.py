@@ -5,7 +5,7 @@ from dash_table.Format import Format, Group, Scheme, Symbol
 import graph as gp
 
 
-
+#Easier to read template avaliable in static folder
 def render_template(fig,df):
 
   layout = html.Div([ 

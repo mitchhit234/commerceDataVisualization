@@ -1,3 +1,5 @@
+#Functions for reading in data, creating/manipulating dataframes,
+#and creating interactive tables and graphs
 import numpy as np
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt

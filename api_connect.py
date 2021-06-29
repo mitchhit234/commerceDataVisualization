@@ -1,3 +1,6 @@
+#Template code for setting up connection with GMAIL API
+#and handling storing credentials
+
 import pickle
 import os
 import traceback

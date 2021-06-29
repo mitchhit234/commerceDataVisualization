@@ -1,3 +1,7 @@
+# Dash application file
+# Handles app template loading and redirects
+
+
 import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
