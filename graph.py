@@ -10,8 +10,7 @@ import db_create as db
 #Default filenames, change as needed
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
-#Will change this to an input later
-BALANCE_VALUE = 4733.20
+META_TABLE = "META"
 
 #Keep float numbers in currency format
 pd.options.display.float_format = "${:.2f}".format
@@ -19,11 +18,40 @@ pd.options.display.float_format = "${:.2f}".format
 
 #Given our current balance value, it gives our starting value
 #before the earliest transaction recorded
-def fetch_starting(D,current):
+def generate_starting(D,current):
   for _ , row in D.iterrows():
     current -= row['net']
   #Round in case of floating point arithmetic getting wonky
   return round(current,2)
+
+
+
+#If the starting value has already been calculated, we fetch that,
+#otherwise we need to calculate it for balance plot rendering
+def check_for_start(D,conn):
+  statement = "SELECT balance FROM " + META_TABLE
+  start = pd.read_sql_query(statement,conn)
+  if start.empty:
+    print('Enter your current balance')
+    current = input()
+    cursor = conn.cursor()
+    start = generate_starting(D.iloc[::-1],float(current))
+    insert_meta_table(D['date'][0],start,cursor)
+    conn.commit()
+    conn.close()
+  else:
+    start = start['balance'][0]
+  return start
+
+
+
+#Insert our starting value for later retrevial into our META table
+def insert_meta_table(date,value,cur):
+  statement = 'INSERT INTO ' + META_TABLE + ' VALUES(' + f'"{date}", ' + str(value) + ')'
+  cur.execute(statement)
+
+
+
 
 #Initalize the current column
 def fetch_current(D,current):
@@ -86,6 +114,8 @@ def prepare_dict(D):
   return ret
       
 
+#Grabs our base columns, date and description, plus
+#one other column corresponding to its page and href
 def grab_base_and_col(D,col_name):
   if len(col_name) < 2:
     col_name = 'BALANCE'
@@ -106,7 +136,8 @@ def grab_base_and_col(D,col_name):
 
   return D
 
-
+#Replace date column with worded version for easier
+#table reading
 def worded_date(D):
   temp = []
   for _,d in D.iterrows():
@@ -211,13 +242,13 @@ def balance_plot(D):
   D['colors'] = colors
 
 
-  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines', customdata=D['description'],hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
+  fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines+markers', customdata=D['description'],hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
 
 
   #Configure variables for graph X axis
-  counts = [1, 7, 1, 1, 1, 5]
-  labels = ["1D", "1W", "1M", "YTD", "1Y", "5Y"]
-  steps = ["day", "day", "month", "year", "year", "year"]
+  counts = [1, 6, 1, 5]
+  labels = ["1M", "6M", "1Y", "5Y"]
+  steps = ["month", "month", "year", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
@@ -295,9 +326,9 @@ def specalized_plot(D,typ):
     marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
 
 
-  counts = [3, 6, 1, 5]
-  labels = ["3M", "6M", "1Y", "5Y"]
-  steps = ["month", "month", "year"]
+  counts = [1, 6, 1, 5]
+  labels = ["1M", "6M", "1Y", "5Y"]
+  steps = ["month", "month", "year", "year"]
   stepmode = "backward"
 
   fig = set_fig_x_axis(fig,counts,labels,steps,stepmode,False)
@@ -345,8 +376,9 @@ def initalize():
   df = df.fillna(0)
   df['net'] = df['credit'] - df['debit']
 
-  #our first transaction stored in the database
-  start = fetch_starting(df.iloc[::-1], BALANCE_VALUE)
+  #Helps generate our balance plot
+  start = check_for_start(df,conn)
   df['balance'] = fetch_current(df,start)
   
   return df
+
