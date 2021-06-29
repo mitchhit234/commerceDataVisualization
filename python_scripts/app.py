@@ -2,13 +2,14 @@
 # Handles app template loading and redirects
 import dash
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 from dash.dependencies import Input, Output
 import graph as gp
 import template as t
 
 global_pathname, global_sortby = '', []
 
-css = [dbc.themes.BOOTSTRAP, 'static/styles.css']
+css = [dbc.themes.BOOTSTRAP, 'assets/tyles.css']
 
 app = dash.Dash(__name__, external_stylesheets=css)
 
