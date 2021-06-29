@@ -5,8 +5,6 @@
 #have to be entered manually or through the export method)
 #Transfer from another commerece account
 #Direct deposits (gives alert to action and desc, but not price)
-
-
 from api_connect import Create_Service
 from bs4 import BeautifulSoup
 import base64

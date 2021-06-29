@@ -1,17 +1,10 @@
 #Functions for reading in data, creating/manipulating dataframes,
 #and creating interactive tables and graphs
 import numpy as np
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-from pandas.core.frame import DataFrame
-import db_create as db
-from datetime import date
-
-import plotly.offline as py
-import plotly.graph_objects as go
 import pandas as pd
-import plotly.express as px
-
+from datetime import date
+import plotly.graph_objects as go
+import db_create as db
 
 
 #Default filenames, change as needed
@@ -22,15 +15,6 @@ BALANCE_VALUE = 4733.20
 
 #Keep float numbers in currency format
 pd.options.display.float_format = "${:.2f}".format
-
-
-#Template for returning a plot object
-def generate_plot(X,Y,x_label,y_label,title):
-  plt.plot(X,Y)
-  plt.xlabel(x_label)
-  plt.ylabel(y_label)
-  plt.title(title)
-  return plt
 
 
 #Given our current balance value, it gives our starting value
