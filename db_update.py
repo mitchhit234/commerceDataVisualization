@@ -143,17 +143,18 @@ if __name__ == "__main__":
       clean_date = date_obj.strftime('%Y-%m-%d')
       desc = r[2].text.split(':')[1]
 
-      #We need user input since commerce alerts will not give us the dollar amount
-      print('What is the value of this transaction?\nDate: {} \nDescription: {}'.format(clean_date,desc))
-      money = input()
-
-      values = [f'"{clean_date}"', str(0), f'"{desc}"', 'None', clean_money(money)]
-
       if compare_dates(clean_date,last_date):
+
+        #We need user input since commerce alerts will not give us the dollar amount
+        print('What is the value of this transaction?\nDate: {} \nDescription: {}'.format(clean_date,desc))
+        money = input()
+
+        values = [f'"{clean_date}"', str(0), f'"{desc}"', 'None', clean_money(money)]
+
         if prevent_repeats(values,last_entries):
           values[3] = 'NULL'
           valid_values.append(values)
-          
+            
       
 
   #GMail query returns emails from newest to oldest
