@@ -7,7 +7,7 @@
 #Direct deposits (gives alert to action and desc, but not price)
 from api_connect import Create_Service
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 import base64
 import db_create as db
 
@@ -140,13 +140,15 @@ if __name__ == "__main__":
       
       #formatting raw data for datatable insertion
       date_obj = datetime.strptime(date,'%d %b %Y')
+      #gmail seems to consistently report days as one day earlier
+      date_obj = date_obj + timedelta(days=1)
       clean_date = date_obj.strftime('%Y-%m-%d')
       desc = r[2].text.split(':')[1]
 
       if compare_dates(clean_date,last_date):
 
         #We need user input since commerce alerts will not give us the dollar amount
-        print('What is the value of this transaction?\nDate: {} \nDescription: {}'.format(clean_date,desc))
+        print('What is the value of this direct deposit transaction?\nDate: {} \nDescription: {}'.format(clean_date,desc))
         money = input()
 
         values = [f'"{clean_date}"', str(0), f'"{desc}"', 'None', clean_money(money)]
