@@ -7,6 +7,7 @@
 #Direct deposits (gives alert to action and desc, but not price)
 from api_connect import Create_Service
 from bs4 import BeautifulSoup
+from datetime import datetime
 import base64
 import db_create as db
 
@@ -66,7 +67,7 @@ def get_last_transactions(cur,key,tbl_name):
 #Prevent insertion of data already inserted in the DB
 def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
-    if repeats[i][2:4] == tuple(inst[2:4]) and repeats[i][0] == inst[0].replace('"',''):
+    if repeats[i][2] == inst[2]:
       return False
   return True
 
@@ -122,6 +123,32 @@ if __name__ == "__main__":
           values = [reorder_date(r[3].text), str(0), 
                     f'"{r[4].text}"', clean_money(r[5].text), 'NULL']         
           valid_values.append(values)
+
+    #5 total font tags represent the format for a direct deposit alert
+    elif len(r) == 5:
+      headers = mesg_obj['payload']['headers']
+      date = ''
+      for i in headers:
+        if i['name'] == 'Date':
+          date = i['value'][5:16]
+          break
+      
+      #formatting raw data for datatable insertion
+      date_obj = datetime.strptime(date,'%d %b %Y')
+      clean_date = date_obj.strftime('%Y-%m-%d')
+      desc = r[2].text.split(':')[1]
+
+      if compare_dates(clean_date,last_date):
+        temp = [clean_date, str(0), desc]
+        if prevent_repeats(temp,last_entries):
+          #We need user input since commerce alerts will not give us the dollar amount
+          print('What is the value of this transaction?\nDate: {} \nDescription: {}'.format(clean_date,desc))
+          money = input()
+
+          values = [f'"{clean_date}"', str(0), f'"{desc}"', 'NULL', clean_money(money)]
+          valid_values.append(values)
+          
+      
 
   #GMail query returns emails from newest to oldest
   #We want to insert those in the reverse order
