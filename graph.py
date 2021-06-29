@@ -32,7 +32,7 @@ def check_for_start(D,conn):
   statement = "SELECT balance FROM " + META_TABLE
   start = pd.read_sql_query(statement,conn)
   if start.empty:
-    print('Enter your current balance')
+    print('Enter your current (avaliable) account balance')
     current = input()
     cursor = conn.cursor()
     start = generate_starting(D.iloc[::-1],float(current))
