@@ -6,6 +6,9 @@ import traceback
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
+from pathlib import Path
+
+ABSOLUTE = str(Path(__file__).parents[1])
 
 
 def Create_Service(client_secret_file, api_name, api_version, *scopes):
@@ -17,7 +20,7 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
     print(SCOPES)
     
     cred = None
-    pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
+    pickle_file = f'{ABSOLUTE}/resources/token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
     
     if os.path.exists(pickle_file):
         with open(pickle_file, 'rb') as token:

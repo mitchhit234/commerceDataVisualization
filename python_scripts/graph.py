@@ -4,11 +4,13 @@ import numpy as np
 import pandas as pd
 from datetime import date
 import plotly.graph_objects as go
+from pathlib import Path
 import db_create as db
 
 
 #Default filenames, change as needed
-DB_NAME = "transaction.db"
+ABSOLUTE = str(Path(__file__).parents[1])
+DB_NAME = ABSOLUTE + "/resources/transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 META_TABLE = "META"
 

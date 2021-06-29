@@ -2,8 +2,10 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+from pathlib import Path
 import graph as gp
 
+ABSOLUTE = str(Path(__file__).parents[1])
 
 #Easier to read template avaliable in static folder
 def render_template(fig,df):
@@ -88,7 +90,7 @@ def render_template(fig,df):
                               href='https://github.com/mitchhit234/commerceGUI',
                               children=[ 
                                 html.Img(
-                                  src='static/github.png',
+                                  src="static/github.png",
                                   width=40,
                                   height=40
                                 )

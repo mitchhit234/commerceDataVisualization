@@ -2,15 +2,20 @@
 #in the format provided by Commerce Bank
 import sqlite3
 from sqlite3 import Error 
+from pathlib import Path
 import traceback
+
 
 #Default filenames, change as needed
 #Change db_update as well
-DB_NAME = "transaction.db"
+ABSOLUTE = str(Path(__file__).parents[1])
+RESOURCES = ABSOLUTE + '/resources/'
+SQL = ABSOLUTE + '/sql_scripts/'
+DB_NAME = RESOURCES + "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
-TRANSACTION_SCRIPT = "transaction_creation.sql"
-META_SCRIPT = "meta_creation.sql"
-IMPORT_FILE = "export.csv"
+TRANSACTION_SCRIPT = SQL + "transaction_creation.sql"
+META_SCRIPT = SQL + "meta_creation.sql"
+IMPORT_FILE = RESOURCES + "export.csv"
 
 
 #Will create a database with the desired name

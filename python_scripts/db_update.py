@@ -5,20 +5,25 @@
 #have to be entered manually or through the export method)
 #Transfer from another commerece account
 #Direct deposits (gives alert to action and desc, but not price)
-from api_connect import Create_Service
+
+from pathlib import Path
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import base64
+
 import db_create as db
+from api_connect import Create_Service
 
 
 #Default file names and other variables
 #Change only if needed
-CLIENT_SECRET_FILE = "api_id.json"
+ABSOLUTE = str(Path(__file__).parents[1])
+RESOURCES = ABSOLUTE + "/resources/"
+CLIENT_SECRET_FILE = RESOURCES + "api_id.json"
 API_NAME = "gmail"
 API_VERSION = "v1"
 SCOPES = ["https://mail.google.com/"]
-DB_NAME = "transaction.db"
+DB_NAME = RESOURCES + "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
 #Depth indicates how many entries max
 #will be returned from our GMail query
