@@ -233,19 +233,7 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
 #current balance value, given a list of transactions
 #and the starting balance before those transactions
 def balance_plot(D):
-  #Make credit and debit price charts format nicer
-  colors = []
-  for _,row in D.iterrows():
-    if row['net'] > 0:
-      colors.append('#00ff00')
-    else:
-      colors.append('#ff0000')
-
-  D['colors'] = colors
-
-
   fig = go.FigureWidget(go.Scatter(x=D['date'], y=D['balance'], mode='lines+markers', customdata=D['description'],hovertemplate='Balance: $%{y:.2f}'+'<br>Date: %{x} <extra></extra>'))
-
 
   #Configure variables for graph X axis
   counts = [1, 6, 1, 5]
@@ -274,7 +262,6 @@ def balance_plot(D):
 
 #Pass type credit, debit, or net for accompying graph
 def specalized_plot(D,typ):
-
   # '/' or '' page is the home page, which shoud be the balance plot
   if len(typ) < 2:
     return balance_plot(D)
@@ -322,12 +309,12 @@ def specalized_plot(D,typ):
     monthDF['color'] = cl
 
 
-
+  #Figure creation, similar to balance plot but in bar chart format
   fig=go.Figure()
   fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
     marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
 
-
+  #Setting up the range selector buttons
   counts = [1, 6, 1, 5]
   labels = ["1M", "6M", "1Y", "5Y"]
   steps = ["month", "month", "year", "year"]

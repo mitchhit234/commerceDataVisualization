@@ -90,7 +90,7 @@ def render_template(fig,df):
                               href='https://github.com/mitchhit234/commerceGUI',
                               children=[ 
                                 html.Img(
-                                  src="static/github.png",
+                                  src="assets/github.png",
                                   width=40,
                                   height=40
                                 )
@@ -124,7 +124,7 @@ def render_template(fig,df):
                 html.Div(
                   className='grid-col-child dash-table',
                   children=[
-                    'Transaction Table',
+                    'TRANSACTION TABLE',
                     dash_table.DataTable(
                       id='table-sorting',
                       columns=[{"name": i, "id": i} for i in df.columns],
@@ -165,7 +165,7 @@ def render_template(fig,df):
                       style_table={
                           'minHeight': '600px', 'height': '600px', 'maxHeight': '600px',
                           'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
-                      },
+                      }
                     ),
                     # dash_table.DataTable(
                     #   id = 'hover-table',

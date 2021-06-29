@@ -6,42 +6,11 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output
 import graph as gp
 import template as t
+import db_update as update
 
 global_pathname, global_sortby = '', []
-
 css = [dbc.themes.BOOTSTRAP, 'assets/tyles.css']
-
 app = dash.Dash(__name__, external_stylesheets=css)
-
-#Base df with all the DB columns + net value
-df = gp.initalize()
-pre_change = df.copy()
-df['date'] = gp.adjust_dates(df)
-
-#We use different data frames for the different plots,
-#for example we have a balance column for the plot,
-#and we delete columns from the table df and alter description
-#plot_df = gp.main_plot_df(df.copy())
-
-table_df = gp.table_df(pre_change.copy(),['num','credit','debit','net'])
-
-#Inital page
-fig = gp.balance_plot(df)
-app.layout = t.render_template(fig,table_df)
-
-
-
-# @app.callback(
-#   Output('hover-table','data'),
-#   Input('figure-content','clickData'), prevent_initial_call=True
-# )
-# def display_hover_data(clickData):
-#   info = clickData['points'][0]
-#   new = []
-#   new.append(dict(DATE=info['x'][:10], DESCRIPTION=info['customdata'], BALANCE=round(info['y'],2)))
-#   return new
-
-
 
 
 @app.callback(
@@ -107,4 +76,26 @@ def update_page(pathname,sort_by):
 
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  #updates the database from commerce alert emails
+  #searches emails as deep as input
+  #(may add deletion of emails later, don't want to start
+  #out with deletion of emails)
+  update.update(20)
+
+  #Base df with all the DB columns + net value
+  df = gp.initalize()
+  pre_change = df.copy()
+  df['date'] = gp.adjust_dates(df)
+
+  #We use different data frames for the different plots,
+  #for example we have a balance column for the plot,
+  #and we delete columns from the table df and alter description
+  #plot_df = gp.main_plot_df(df.copy())
+
+  table_df = gp.table_df(pre_change.copy(),['num','credit','debit','net'])
+
+  #Inital page
+  fig = gp.balance_plot(df)
+  app.layout = t.render_template(fig,table_df)
+
+  app.run_server(use_reloader=False)

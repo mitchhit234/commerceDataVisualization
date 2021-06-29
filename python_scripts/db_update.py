@@ -25,9 +25,6 @@ API_VERSION = "v1"
 SCOPES = ["https://mail.google.com/"]
 DB_NAME = RESOURCES + "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
-#Depth indicates how many entries max
-#will be returned from our GMail query
-DEPTH = 100
 ALERT_ADDRESS = "CommerceBankAlerts@commercebank.com"
 
 
@@ -90,8 +87,9 @@ def find_correct_mimeType(P):
       return i['body']['data']
 
 
-
-if __name__ == "__main__":
+#Depth indicates how many entries max
+#will be returned from our GMail query
+def update(DEPTH):
   #Getting connected to the API for this user
   #based on their credentials file
   service = Create_Service(CLIENT_SECRET_FILE,API_NAME, API_VERSION,SCOPES)
