@@ -14,7 +14,7 @@ import db_create as db
 
 #Default file names and other variables
 #Change only if needed
-CLIENT_SECRET_FILE = "credentials.json"
+CLIENT_SECRET_FILE = "api_id.json"
 API_NAME = "gmail"
 API_VERSION = "v1"
 SCOPES = ["https://mail.google.com/"]
