@@ -26,14 +26,21 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
     if not cred or not cred.valid:
         #refresh function not working, we will just ask for user authentication
         #again when token expires
-        # if cred and cred.expired and cred.refresh_token:
-        #     cred.refresh(Request())
-        # else:
-        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
-        cred = flow.run_local_server()
+        if cred and cred.expired and cred.refresh_token:
+            try:
+                cred.refresh(Request())
+            except:
+                print("Refresh error, creating new token file")
+                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+                cred = flow.run_local_server()
+                with open(pickle_file, 'wb') as token:
+                    pickle.dump(cred, token)
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+            cred = flow.run_local_server()
 
-        with open(pickle_file, 'wb') as token:
-            pickle.dump(cred, token)
+            with open(pickle_file, 'wb') as token:
+                pickle.dump(cred, token)
 
     try:
         service = build(API_SERVICE_NAME, API_VERSION, credentials=cred)
