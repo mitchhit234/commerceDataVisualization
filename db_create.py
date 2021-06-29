@@ -8,7 +8,8 @@ import traceback
 #Change db_update as well
 DB_NAME = "transaction.db"
 TABLE_NAME = "TRANSACTIONS"
-CREATE_SCRIPT = "table_creation.sql"
+TRANSACTION_SCRIPT = "transaction_creation.sql"
+META_SCRIPT = "meta_creation.sql"
 IMPORT_FILE = "export.csv"
 
 
@@ -23,10 +24,8 @@ def create_database(desired_name):
   except Error as e:
     traceback.print_exc()
 
-#Creates a table for our transactions as outlined
-#in the table_creation.sql file
-#If table already exists, error message is output 
-#but program will continue inserting
+#Creates a table as outlined
+#in the corresponding sql file
 def create_table(cur,filename):
   with open(filename, 'r') as f:
     query = f.read()
@@ -34,7 +33,6 @@ def create_table(cur,filename):
     cur.execute(query)
   except Error as e:
     traceback.print_exc()
-    print("Insertion will continue on the already existing table")
 
 
 #Insert each row from our CSV file into our database
@@ -113,7 +111,8 @@ def net(debit_credit):
 if __name__ == "__main__":
   conn = create_database(DB_NAME)
   cursor = conn.cursor()
-  create_table(cursor,CREATE_SCRIPT)
+  create_table(cursor,TRANSACTION_SCRIPT)
+  create_table(cursor,META_SCRIPT)
   insert_statement_data(cursor,IMPORT_FILE,TABLE_NAME) 
   conn.commit()
   conn.close()
