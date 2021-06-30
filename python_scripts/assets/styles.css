@@ -31,7 +31,7 @@ html, body {
 .navbar-brand{
   font-size: 125%;
   position: absolute;
-  left: 45%;
+  left: 33%;
   display: block;
 }
 
@@ -44,8 +44,12 @@ html, body {
 }
 
 
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1325px) {
   .dash-table {
+    display: none;
+  }
+
+  .navbar-brand{
     display: none;
   }
 

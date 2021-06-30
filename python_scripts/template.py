@@ -24,7 +24,11 @@ def render_template(fig,df):
                 html.A(
                   className='navbar-brand',
                   href='/',
-                  children='Commerce GUI'
+                  children=[
+                    html.Img(
+                      src="assets/logo.png",
+                    )
+                  ]
                 ),              
                 html.Div(
                   className='collapse navbar-collapse',
