@@ -1,8 +1,9 @@
 #!/bin/bash
 
 
-if [[ $1 -eq '-s' ]]
+if [[ $1 = '-s' ]]
 then
+	pip install -r resources/requirements.txt
 	python3 python_scripts/db_create.py
 fi
 
