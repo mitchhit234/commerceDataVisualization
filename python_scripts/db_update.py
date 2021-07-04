@@ -70,7 +70,7 @@ def get_last_transactions(cur,key,tbl_name):
 #Issues could arise later here, not the best logic
 def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
-    if comp(repeats[i][3],inst[3]) or comp(repeats[i][4],inst[4]):
+    if comp(repeats[i][3],inst[3]) and comp(repeats[i][4],inst[4]):
       return False
   return True
 
@@ -82,7 +82,6 @@ def comp(x,y):
   elif float(x) == float(y):
     return True
   return False
-
 
 
 #Will help fetch the correct part of the email
