@@ -70,13 +70,19 @@ def get_last_transactions(cur,key,tbl_name):
 #Issues could arise later here, not the best logic
 def prevent_repeats(inst,repeats):
   for i in range(len(repeats)):
-    if str(repeats[i][3]) ==  inst[3]:
-      if float(repeats[i][4]) == float(inst[4]):
-        return False
-    elif str(repeats[i][4]) == inst[4]:
-      if float(repeats[i][3]) == float(inst[3]):
-        return False
+    if comp(repeats[i][3],inst[3]) or comp(repeats[i][4],inst[4]):
+      return False
   return True
+
+#Compare values that could be either a number as a string
+#in different percision formats or strings containing 'None'
+def comp(x,y):
+  if str(x) == 'None' and str(y) == 'None':
+    return True
+  elif float(x) == float(y):
+    return True
+  return False
+
 
 
 #Will help fetch the correct part of the email
