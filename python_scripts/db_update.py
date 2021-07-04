@@ -77,8 +77,10 @@ def prevent_repeats(inst,repeats):
 #Compare values that could be either a number as a string
 #in different percision formats or strings containing 'None'
 def comp(x,y):
-  if str(x) == 'None' and str(y) == 'None':
-    return True
+  if str(x) == 'None' or str(y) == 'None':
+    if str(x) == 'None' and str(y) == 'None':
+      return True
+    return False
   elif float(x) == float(y):
     return True
   return False
