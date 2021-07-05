@@ -2,9 +2,7 @@
   <img src="resources/readme/logo.jpg">
 </p>
 
-
-
-
+<br />
 
 Commerce Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data with various identifiers
 
@@ -73,3 +71,8 @@ The main branch of this repo at the moment contains all the features that were i
 - Let users create categories to automatically place transactions in
 - Edit Gmail API to be more efficient (currently does not delete already processed alerts)
 - Windows Executeable? (all python scripts should be good for Windows, just need to test it myself in a Windows environment)
+
+
+
+
+*NEITHER I NOR THIS APPLICATION IS AFFILIATED WITH COMMERCE BANK*
