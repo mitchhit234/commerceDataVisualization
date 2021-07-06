@@ -7,7 +7,7 @@
 Commerce Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data with various 
 
 <p align="center">
-  <img src="resources/readme/demo.gif" width="1200px" height="600px">
+  <img src="resources/readme/demo.gif">
 </p>
 
 The goal of this project was to give myself an easy way to view my transactions and keep track of my financial goals, as well as monitor for unauthorized transactions. Commerce Bank does not officially provide any data visualization tools (at least for free personal accounts). Any other Commerce Bank user looking to visualize their transaction data can utilize this application
