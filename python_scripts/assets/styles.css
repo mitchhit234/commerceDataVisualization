@@ -31,7 +31,8 @@ html, body {
 .navbar-brand{
   font-size: 125%;
   position: absolute;
-  left: 33%;
+  left: 40%;
+  /*left: 33%;*/
   display: block;
 }
 

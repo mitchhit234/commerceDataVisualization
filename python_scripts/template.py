@@ -80,32 +80,32 @@ def render_template(fig,df):
                     )
                   ]
                 ),
-                html.Div(
-                  className='collapse navbar-collapse justify-content-end',
-                  children=[
-                    html.Ul(
-                      className='navbar-nav',
-                      children=[ 
-                        html.Li(
-                          className='nav-item',
-                          children=[ 
-                            html.A(
-                              className='nav-link',
-                              href='https://github.com/mitchhit234/commerceGUI',
-                              children=[ 
-                                html.Img(
-                                  src="assets/github.png",
-                                  width=40,
-                                  height=40
-                                )
-                              ]
-                            )
-                          ]
-                        )
-                      ]
-                    )
-                  ]
-                )
+                # html.Div(
+                #   className='collapse navbar-collapse justify-content-end',
+                #   children=[
+                #     html.Ul(
+                #       className='navbar-nav',
+                #       children=[ 
+                #         html.Li(
+                #           className='nav-item',
+                #           children=[ 
+                #             html.A(
+                #               className='nav-link',
+                #               href='https://github.com/mitchhit234/commerceGUI',
+                #               children=[ 
+                #                 html.Img(
+                #                   src="assets/github.png",
+                #                   width=40,
+                #                   height=40
+                #                 )
+                #               ]
+                #             )
+                #           ]
+                #         )
+                #       ]
+                #     )
+                #   ]
+                # )
               ]
             )
           ]
