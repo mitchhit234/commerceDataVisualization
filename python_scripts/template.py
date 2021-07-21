@@ -128,7 +128,7 @@ def render_template(fig,df):
                 html.Div(
                   className='grid-col-child dash-table',
                   children=[
-                    'TRANSACTION TABLE',
+                    'ALL DATA',
                     dash_table.DataTable(
                       id='table-sorting',
                       columns=[{"name": i, "id": i} for i in df.columns],
@@ -167,51 +167,65 @@ def render_template(fig,df):
                       #Prevents errors when data is small enough to actualy shorthen table size
                       #dash does not handle this well, starts infinite looping
                       style_table={
-                          'minHeight': '600px', 'height': '600px', 'maxHeight': '600px',
+                          'minHeight': '300px', 'height': '300px', 'maxHeight': '300px',
                           'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
                       }
                     ),
-                    # dash_table.DataTable(
-                    #   id = 'hover-table',
-                    #   style_data={
-                    #     'whiteSpace': 'normal',
-                    #     'height': 'auto',
-                    #   },
-                    #   style_cell={
-                    #     'textAlign': 'left'
-                    #   },
-                    #   style_cell_conditional=[
-                    #     {
-                    #       'if': {'column_id': 'DATE'},
-                    #       'width': 111
-                    #     },
-                    #     {
-                    #       'if': {'column_id': 'NET'},
-                    #       'width': 100
-                    #     },
-                    #     {
-                    #       'if': {'column_id': 'CREDIT'},
-                    #       'width': 100
-                    #     },
-                    #     {
-                    #       'if': {'column_id': 'DEBIT'},
-                    #       'width': 100
-                    #     },
-                    #     {
-                    #       'if': {'column_id': 'DESCRIPTION'},
-                    #       'width': 300
-                    #     },
-                    #     {
-                    #       'if': {'column_id': 'BALANCE'},
-                    #       'width': 93,
-                    #       'textAlign': 'right'
-                    #     },
-                    #   ],
-                    #   columns=[{"name": i, "id": i} for i in df.columns],
-                    #   data=[dict(DATE='',DESCRIPTION='',BALANCE='')]
-                    # )
+                    html.Div(
+                      id='hover-table-container',
+                      style = {'margin-top': '50px'},
+                      children=[
+                        "SELECT A DATA POINT",
+                        dash_table.DataTable(
+                          id = 'hover-table',
+                          fixed_rows={'headers': True},
+                          style_data={
+                            'whiteSpace': 'normal',
+                            'height': 'auto',
+                          },
+                          style_cell={
+                            'textAlign': 'left'
+                          },
+                          style_cell_conditional=[
+                            {
+                              'if': {'column_id': 'DATE'},
+                              'width': 111
+                            },
+                            {
+                              'if': {'column_id': 'NET'},
+                              'width': 100,
+                              'textAlign': 'right'
+                            },
+                            {
+                              'if': {'column_id': 'CREDIT'},
+                              'width': 100,
+                              'textAlign': 'right'
+                            },
+                            {
+                              'if': {'column_id': 'DEBIT'},
+                              'width': 100,
+                              'textAlign': 'right'
+                            },
+                            {
+                              'if': {'column_id': 'DESCRIPTION'},
+                              'width': 300
+                            },
+                            {
+                              'if': {'column_id': 'BALANCE'},
+                              'width': 93,
+                              'textAlign': 'right'
+                            },
+                          ],
+                          columns=[{"name": i, "id": i} for i in df.columns],
+                          data=[dict(DATE='',DESCRIPTION='',BALANCE='')],
+                          style_table={
+                          'minHeight': '0px', 'height': '300px', 'maxHeight': '300px',
+                          'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
+                          }
+                        )
+                      ]        
+                    )
                   ]
-
                 )
               ]
             )

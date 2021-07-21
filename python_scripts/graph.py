@@ -115,7 +115,6 @@ def prepare_dict(D):
         ret[i][key] = ret[i][key].format(ret[i][key], '.2f')
   return ret
       
-
 #Grabs our base columns, date and description, plus
 #one other column corresponding to its page and href
 def grab_base_and_col(D,col_name):
@@ -156,6 +155,12 @@ def update_date_list(L,count,current):
     hr_extension = int((i/denom)*24)
     L.append(current + " " + str(hr_extension))
   return L
+
+#Delete all data from a dataframe that does not fall
+#within the given month
+def month_only(D,month):
+  to_remove = []
+
 
 
 #Truncate information not needed from the date
