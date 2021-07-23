@@ -190,13 +190,16 @@ def summarize_desc(D):
   temp = []
   for _, row in D.iterrows():
     raw = row['description'].split(' ')
-    new = ''
+    new = ' '
     for i in raw:
       i = i.upper()
       if i not in redundant_full:
         if not any(j in i for j in redundant_sub):
           if not any(x.isdigit() for x in i):
             new += i + ' '
+    #removing prefix spaces that show up sometime for sorting reasons
+    while new[0] == ' ':
+      new = new[1:]
     temp.append(new)
 
   return temp
