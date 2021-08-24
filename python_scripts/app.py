@@ -124,7 +124,7 @@ if __name__ == '__main__':
   #searches emails as deep as input
   #(may add deletion of emails later, don't want to start
   #out with deletion of emails)
-  update.update(40)
+  #update.update(40)
 
   #Base df with all the DB columns + net value
   df = gp.initalize()
