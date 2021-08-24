@@ -17,6 +17,7 @@ from datetime import timedelta
 import plaid
 import datetime
 import json
+import time
 
 app = Flask(__name__)
 
@@ -77,11 +78,8 @@ def exchange_public_token():
     )
     response = client.item_public_token_exchange(req2)
     access_token = response['access_token']
+    print(access_token)
     item_id = response['item_id']
-
-
-
-
 
     return jsonify(response.to_dict())
 
@@ -103,23 +101,34 @@ def get_accounts():
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
     # Pull transactions for the last 30 days
-    start_date = (datetime.datetime.now() - timedelta(days=365))
+    start_date = (datetime.datetime.now() - timedelta(days=730))
     end_date = datetime.datetime.now()
 
-    try:
-        options = TransactionsGetRequestOptions()
-        request = TransactionsGetRequest(
-            access_token=access_token,
-            start_date=start_date.date(),
-            end_date=end_date.date(),
-            options=options
-        )
-        response = client.transactions_get(request)
-        return jsonify(response.to_dict())
+    options = TransactionsGetRequestOptions(count=500)
+    frozen = 10
 
-    except plaid.ApiException as e:
-        error_response = format_error(e)
-        return jsonify(error_response)
+    #Time out after 30 seconds
+    while True:  
+        try:
+            request = TransactionsGetRequest(
+                access_token=access_token,
+                start_date=start_date.date(),
+                end_date=end_date.date(),
+                options=options
+            )
+            response = client.transactions_get(request)
+            return jsonify(response.to_dict())
+
+        except plaid.ApiException as e:
+            time.sleep(3)
+            frozen -= 1
+            if frozen < 1:
+                error_response = format_error(e)
+                return jsonify(error_response)
+    
+
+
+
 
 
 @app.route('/shutdown', methods=['GET'])

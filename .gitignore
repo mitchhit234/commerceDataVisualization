@@ -2,3 +2,4 @@ __pycache__
 transaction.db
 token_gmail_v1.pickle
 .vscode*
+resources/access_token.txt
