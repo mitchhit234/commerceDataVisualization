@@ -1,5 +1,6 @@
 #Functions for reading in data, creating/manipulating dataframes,
 #and creating interactive tables and graphs
+import json
 import numpy as np
 import pandas as pd
 from datetime import date
@@ -56,7 +57,7 @@ def insert_meta_table(date,value,cur):
 
 
 #Initalize the current column
-def fetch_current(D,current):
+def fetch_balance_col(D,current):
   ret = []
   for _, row in D.iterrows():
     current += row['net']
@@ -198,8 +199,8 @@ def summarize_desc(D):
           if not any(x.isdigit() for x in i):
             new += i + ' '
     #removing prefix spaces that show up sometime for sorting reasons
-    while new[0] == ' ':
-      new = new[1:]
+    # while new[0] == ' ':
+    #   new = new[1:]
     temp.append(new)
 
   return temp
@@ -375,7 +376,45 @@ def initalize():
 
   #Helps generate our balance plot
   start = check_for_start(df,conn)
-  df['balance'] = fetch_current(df,start)
+  df['balance'] = fetch_balance_col(df,start)
   
   return df
+
+
+#Read from our JSON data from Plaid instead of DB method
+def json_initalize():
+  with open('resources/transactions.json', 'r') as inp:
+    data = json.load(inp)
+
+  current_balance = data['accounts'][0]['balances']['available']
+
+  temp_df = pd.json_normalize(data, record_path=['transactions'])
+  cols = ['date','amount','name']
+  df = temp_df[cols]
+  df = df.iloc[::-1]
+
+  debit, credit, num = [], [], []
+  for i, row in df.iterrows():
+    if row['amount'] > 0:
+      debit.append(row['amount'])
+      credit.append(0)
+    else:
+      debit.append(0)
+      credit.append(abs(row['amount']))
+    num.append(i+1)
+    
+    
+  df['amount'] = -df['amount']
+  df['debit'], df['credit'], df['num'] = debit, credit, num
+
+  df = df.rename({'amount': 'net', 'name': 'description'}, axis=1)
+
+  start = generate_starting(df,current_balance)
+  df['balance'] = fetch_balance_col(df,start)
+
+  df = df[['date', 'num', 'description', 'debit', 'credit', 'net', 'balance']]
+
+  return df
+
+
 

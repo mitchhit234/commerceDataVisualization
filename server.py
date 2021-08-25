@@ -15,10 +15,12 @@ from flask import jsonify
 from datetime import datetime
 from datetime import timedelta
 from os import path
+import pandas as pd
 import plaid
 import datetime
 import json
 import time
+import webbrowser
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -57,6 +59,16 @@ def format_error(e):
     response = json.loads(e.body)
     return {'error': {'status_code': e.status, 'display_message':
                       response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}}
+
+#Get most recent transaction date from plaid json file
+def get_most_recent_date(filename):
+    with open('resources/transactions.json', 'r') as inp:
+        data = json.load(inp)
+    temp = pd.json_normalize(data, record_path=['transactions'])
+    date_string = temp.iloc[0]['date']
+    date = date_string.split('-')
+
+    return datetime.date(int(date[0]),int(date[1]),int(date[2]))
 
 
 @app.route("/create_link_token", methods=['POST'])
@@ -109,9 +121,17 @@ def get_accounts():
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    # Pull transactions for the last 30 days
-    start_date = (datetime.datetime.now() - timedelta(days=730))
-    end_date = datetime.datetime.now()
+    # Pull transactions for the last 2 years if none avaliable, else
+    # pull only new transactions
+    append, date_string = False, None
+    if path.exists('resources/transactions.json'):
+        start_date = get_most_recent_date('resources/transactions.json')
+        append = True
+    else:
+        start_date = (datetime.datetime.now() - timedelta(days=730))
+        start_date = start_date.date()
+
+    end_date = datetime.datetime.now().date()
 
     options = TransactionsGetRequestOptions(count=500)
     frozen = 10
@@ -121,13 +141,27 @@ def get_transactions():
         try:
             request = TransactionsGetRequest(
                 access_token=access_token,
-                start_date=start_date.date(),
-                end_date=end_date.date(),
+                start_date=start_date,
+                end_date=end_date,
                 options=options
             )
             response = client.transactions_get(request)
+            data = jsonify(response.to_dict())
+            if append:
+                with open('resources/transactions.json', 'r') as inp:
+                    existing_data = json.load(inp)
+                
+                to_add, i = [], 0
+
+                while i < len(data.json['transactions']) and data.json['transactions'][i] != existing_data['transactions'][0]:
+                    to_add.append(data.json['transactions'][i])
+                    i += 1
+
+                existing_data['transactions'] = to_add + existing_data['transactions']
+                data = jsonify(existing_data)
+                
+                       
             with open('resources/transactions.json', 'w') as output:
-                data = jsonify(response.to_dict())
                 json.dump(data.json,output, indent=4)
                 return redirect(url_for('shutdown'))
 
@@ -142,14 +176,20 @@ def get_transactions():
 
 @app.route('/shutdown', methods=['GET'])
 def shutdown():
+    #At this point, shutdown and bash script handles
+    #switching over to the application
     shutdown_server()
-    return 'Server shutting down...'
+    return 'Transaction data received'
 
 
 @app.route("/", methods=['GET'])
 def login():
-  return render_template("link.html")
-
+    if path.exists('resources/access_token.txt'):
+        return redirect(url_for('get_transactions'))
+    else:
+        return render_template("link.html")
+        
 
 if __name__ == "__main__":
+    webbrowser.open('http://localhost:8000')
     app.run(port=8000,debug=True)

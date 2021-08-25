@@ -127,7 +127,8 @@ if __name__ == '__main__':
   #update.update(40)
 
   #Base df with all the DB columns + net value
-  df = gp.initalize()
+  #df = gp.initalize()
+  df = gp.json_initalize()
   pre_change = df.copy()
   df['date'] = gp.adjust_dates(df)
 
