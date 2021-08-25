@@ -8,22 +8,26 @@ from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.api import plaid_api
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask import render_template
 from flask import request
 from flask import jsonify
 from datetime import datetime
 from datetime import timedelta
+from os import path
 import plaid
 import datetime
 import json
 import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
-# Fill in your Plaid API keys - https://dashboard.plaid.com/account/keys
-PLAID_CLIENT_ID = '611eef354388c800107c7528'
-PLAID_SECRET = '9bd80fa6147e53e3032624be315f5d'
+#Grab PLAID variables from .env file
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
 
 configuration = plaid.Configuration(
   host=plaid.Environment.Development,
@@ -35,7 +39,11 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
-access_token = None
+if path.exists('resources/access_token.txt'):
+    with open('resources/access_token.txt', 'r') as inp:
+        access_token = inp.read().replace('\n','')
+else:
+    access_token = None
 item_id = None
 
 def shutdown_server():
@@ -78,7 +86,8 @@ def exchange_public_token():
     )
     response = client.item_public_token_exchange(req2)
     access_token = response['access_token']
-    print(access_token)
+    with open('resources/access_token.txt', 'w') as output:
+        output.write(access_token)
     item_id = response['item_id']
 
     return jsonify(response.to_dict())
@@ -117,7 +126,10 @@ def get_transactions():
                 options=options
             )
             response = client.transactions_get(request)
-            return jsonify(response.to_dict())
+            with open('resources/transactions.json', 'w') as output:
+                data = jsonify(response.to_dict())
+                json.dump(data.json,output, indent=4)
+                return redirect(url_for('shutdown'))
 
         except plaid.ApiException as e:
             time.sleep(3)
@@ -126,9 +138,6 @@ def get_transactions():
                 error_response = format_error(e)
                 return jsonify(error_response)
     
-
-
-
 
 
 @app.route('/shutdown', methods=['GET'])
