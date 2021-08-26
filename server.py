@@ -122,8 +122,8 @@ def exchange_public_token():
 #the data analytics application
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    # Pull transactions for the last 2 years if none avaliable, else
-    # pull only new transactions
+    # Pull transactions for the last 2 years (or last 500 transactions)
+    # if none avaliable, else pull only new transactions
     append = False
     if path.exists('resources/transactions.json'):
         start_date = get_most_recent_date('resources/transactions.json')
@@ -153,6 +153,19 @@ def get_transactions():
                 options=options
             )
             response = client.transactions_get(request)
+
+            #Allow for multipule transaction requests if there are more 
+            #transactions that can fit in a single response (500)
+            while len(response['transactions']) < response['total_transactions']:
+                request = TransactionsGetRequest(
+                    access_token=access_token,
+                    start_date=start_date,
+                    end_date=end_date,
+                    options=TransactionsGetRequestOptions(count=500,offset=len(response['transactions']))
+                )
+                resp = client.transactions_get(request)
+                response['transactions'].extend(resp['transactions'])
+
             data = jsonify(response.to_dict())
             
             #If transaction file already exists, we try and append to that data
