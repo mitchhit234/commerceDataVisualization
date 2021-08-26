@@ -253,7 +253,7 @@ def set_fig_x_axis(figure,C,L,S,mode,slide):
     )
   )
 
-  figure.update_xaxes(rangeslider_thickness = 0.1)
+  figure.update_xaxes(rangeslider_thickness = 0.1, tickformat='%b\n%Y')
 
   return figure
 
@@ -342,7 +342,7 @@ def specalized_plot(D,typ):
   #Figure creation, similar to balance plot but in bar chart format
   fig=go.Figure()
   fig.add_trace(go.Bar(x=monthDF['date'], y=monthDF[typ],
-    marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}<extra></extra>'))
+    marker=dict(color=monthDF['color']), hovertemplate='$%{y:.2f}' + '<br>Date: %{x}<extra></extra>'))
 
   #Setting up the range selector buttons
   counts = [1, 6, 1, 5]
