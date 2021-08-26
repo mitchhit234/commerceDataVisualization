@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import date
 import plotly.graph_objects as go
 from pathlib import Path
+import datetime
 import db_create as db
 
 
@@ -146,6 +147,26 @@ def worded_date(D):
     row = d['DATE']
     temp.append(date(year=int(row[:4]), month=int(row[5:7]), day=int(row[8:10])).strftime('%b %d %Y'))
   return temp
+
+#Convert possible datetime format to YYYY-MM-DD format
+def normalize_dates(D):
+  temp = []
+  for _, row in D.iterrows():
+    temp.append(normalize_date(row['date']))
+  return temp
+
+
+
+#Catch different date formats output by plaid
+#including YYYY-MM-DD and when datetime format
+def normalize_date(date_string):
+  if "GMT" in date_string:
+    date_string = date_string[5:16]
+    date_string = date_string.replace(" ","-")
+    date_string = datetime.datetime.strptime(date_string,'%d-%b-%Y').strftime('%Y-%m-%d')    
+  return date_string
+
+
 
 
 #Inserts dates in order of occurence into our
@@ -392,6 +413,8 @@ def json_initalize():
   cols = ['date','amount','name']
   df = temp_df[cols]
   df = df.iloc[::-1]
+
+  df['date'] = normalize_dates(df)
 
   debit, credit, num = [], [], []
   for i, row in df.iterrows():

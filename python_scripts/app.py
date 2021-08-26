@@ -146,4 +146,4 @@ if __name__ == '__main__':
   fig = gp.balance_plot(df)
   app.layout = t.render_template(fig,table_df)
 
-  app.run_server()
+  app.run_server(port=8000)

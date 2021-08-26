@@ -54,18 +54,26 @@ def shutdown_server():
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
 
-
 def format_error(e):
     response = json.loads(e.body)
     return {'error': {'status_code': e.status, 'display_message':
                       response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}}
+
+#Catch different date formats output by plaid
+#including YYYY-MM-DD and when datetime format
+def normalize_date(date_string):
+    if "GMT" in date_string:
+        date_string = date_string[5:16]
+        date_string = date_string.replace(" ","-")
+        date_string = datetime.datetime.strptime(date_string,'%d-%b-%Y').strftime('%Y-%m-%d')    
+    return date_string
 
 #Get most recent transaction date from plaid json file
 def get_most_recent_date(filename):
     with open('resources/transactions.json', 'r') as inp:
         data = json.load(inp)
     temp = pd.json_normalize(data, record_path=['transactions'])
-    date_string = temp.iloc[0]['date']
+    date_string = normalize_date(temp.iloc[0]['date'])
     date = date_string.split('-')
 
     return datetime.date(int(date[0]),int(date[1]),int(date[2]))
