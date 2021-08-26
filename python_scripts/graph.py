@@ -97,10 +97,8 @@ def format_dict_for_table(D):
   float_col_name = ''
   for i in D.columns:
     if D[i].dtypes == 'float':
-      float_col_name = i
-
-  if len(float_col_name) > 0:
-    D[float_col_name] = D[float_col_name].apply(lambda x: "{:.2f}".format(x))
+      D[i] = D[i].apply(lambda x: "${:.2f}".format(x))
+    
 
   return D.to_dict('records')
 

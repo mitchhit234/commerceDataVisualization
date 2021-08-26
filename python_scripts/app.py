@@ -107,13 +107,31 @@ def update_hover(clickData,pathname):
     data = clickData['points'][0]
     wanted_values = ['x', 'y', 'customdata']
     d = {key: data[key] for key in wanted_values}
-    #Format the raw data for table format
-    d['x'] = date(year=int(d['x'][:4]), month=int(d['x'][5:7]), day=int(d['x'][8:10])).strftime('%b %d %Y')
-    d['y'] = round(d['y'],2)
-    ret = pd.DataFrame(data=d, index=[0])
-    #Set the column names to match the table column names
-    ret = ret.rename(columns={"x": "DATE", "y": "BALANCE", "customdata": "DESCRIPTION"})
-    ret = ret[['DATE', 'DESCRIPTION', 'BALANCE']]
+
+    #Remove data points that aren't in the specified page
+    to_remov = [x for x in toggle_cols if x != 'balance' and x != 'net']
+    temp = gp.table_df(pre_change.copy(),to_remov)
+
+    #Get the right transaction by date
+    temp = temp[temp.DATE.str.contains(d['x'][:10])]
+    temp = temp[temp.BALANCE == d['y']]
+
+    #Generate the dict that will be the new interactive table output
+    ret = pd.DataFrame(gp.format_dict_for_table(temp))
+
+
+
+    # #Find the point that was clicked
+    # data = clickData['points'][0]
+    # wanted_values = ['x', 'y', 'customdata']
+    # d = {key: data[key] for key in wanted_values}
+    # #Format the raw data for table format
+    # d['x'] = date(year=int(d['x'][:4]), month=int(d['x'][5:7]), day=int(d['x'][8:10])).strftime('%b %d %Y')
+    # d['y'] = round(d['y'],2)
+    # ret = pd.DataFrame(data=d, index=[0])
+    # #Set the column names to match the table column names
+    ret = ret.rename(columns={"NET": "VALUE"})
+    # ret = ret[['DATE', 'DESCRIPTION', 'BALANCE']]
   return ret.to_dict('records'), [{"name": i, "id": i} for i in ret.columns]
 
 
