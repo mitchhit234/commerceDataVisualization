@@ -407,7 +407,7 @@ def json_initalize():
   with open('resources/transactions.json', 'r') as inp:
     data = json.load(inp)
 
-  current_balance = data['accounts'][0]['balances']['available']
+  current_balance = data['accounts'][0]['balances']['current']
 
   temp_df = pd.json_normalize(data, record_path=['transactions'])
   cols = ['date','amount','name']
