@@ -6,7 +6,6 @@ from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
-from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.api import plaid_api
 from flask import Flask, redirect, url_for
 from flask import render_template
@@ -23,14 +22,16 @@ import time
 import webbrowser
 import os
 from dotenv import load_dotenv
-load_dotenv()
 
+#Load our .env variables
+load_dotenv()
 app = Flask(__name__)
 
 #Grab PLAID variables from .env file
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SECRET = os.getenv('PLAID_SECRET')
 
+#Configured for development environment
 configuration = plaid.Configuration(
   host=plaid.Environment.Development,
   api_key={
@@ -41,6 +42,7 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
+#Check if theres an access token to read in
 if path.exists('resources/access_token.txt'):
     with open('resources/access_token.txt', 'r') as inp:
         access_token = inp.read().replace('\n','')
@@ -48,12 +50,15 @@ else:
     access_token = None
 item_id = None
 
+#Shutdown after transaction data is recieved in order to 
+#transition into the data analysis application
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
 
+#Debug help
 def format_error(e):
     response = json.loads(e.body)
     return {'error': {'status_code': e.status, 'display_message':
@@ -97,6 +102,8 @@ def create_link_token():
     # Send the data to the client
     return jsonify(response.to_dict())
 
+#After link token is created, exchange it for an access
+#token, which will be stored and used later for Plaid API requests
 @app.route('/exchange_public_token', methods=['POST'])
 def exchange_public_token():
     global access_token
@@ -108,30 +115,16 @@ def exchange_public_token():
     access_token = response['access_token']
     with open('resources/access_token.txt', 'w') as output:
         output.write(access_token)
-    item_id = response['item_id']
 
     return jsonify(response.to_dict())
 
-
-# Retrieve an Item's accounts
-@app.route('/accounts', methods=['GET'])
-def get_accounts():
-  try:
-      request = AccountsGetRequest(
-          access_token=access_token
-      )
-      accounts_response = client.accounts_get(request)
-  except plaid.ApiException as e:
-      response = json.loads(e.body)
-      return jsonify({'error': {'status_code': e.status, 'display_message':
-                      response['error_message'], 'error_code': response['error_code'], 'error_type': response['error_type']}})
-  return jsonify(accounts_response.to_dict())
-
+#Request used for gaining transaction data needed to populate
+#the data analytics application
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
     # Pull transactions for the last 2 years if none avaliable, else
     # pull only new transactions
-    append, date_string = False, None
+    append = False
     if path.exists('resources/transactions.json'):
         start_date = get_most_recent_date('resources/transactions.json')
         append = True
@@ -141,12 +134,18 @@ def get_transactions():
 
     end_date = datetime.datetime.now().date()
 
+    #Max transactions allowed in a single request
     options = TransactionsGetRequestOptions(count=500)
+    
+    #Time out variable in case of error
     frozen = 10
 
     #Time out after 30 seconds
     while True:  
         try:
+            #Send the request for the transaction data
+            #usually takes some time, which is the reason
+            #behind having a for loop
             request = TransactionsGetRequest(
                 access_token=access_token,
                 start_date=start_date,
@@ -155,27 +154,34 @@ def get_transactions():
             )
             response = client.transactions_get(request)
             data = jsonify(response.to_dict())
+            
+            #If transaction file already exists, we try and append to that data
             if append:
                 with open('resources/transactions.json', 'r') as inp:
                     existing_data = json.load(inp)
                 
                 to_add, i = [], 0
 
+                #Data is always fetched in date order, so once we hit a transaction we have
+                #we know that we have all the transactions after
                 while i < len(data.json['transactions']) and data.json['transactions'][i] != existing_data['transactions'][0]:
                     to_add.append(data.json['transactions'][i])
                     i += 1
 
+                #Prepend these new transactions to the beggining of our transaction data
                 existing_data['transactions'] = to_add + existing_data['transactions']
                 data = jsonify(existing_data)
                 
-                       
+            #Write transaction data to file         
             with open('resources/transactions.json', 'w') as output:
                 json.dump(data.json,output, indent=4)
                 return redirect(url_for('shutdown'))
-
+        
+        #Wait 3 seconds to try and request transaction data again post failure
         except plaid.ApiException as e:
             time.sleep(3)
             frozen -= 1
+            #After 30 seconds, return error message
             if frozen < 1:
                 error_response = format_error(e)
                 return jsonify(error_response)
@@ -192,10 +198,11 @@ def shutdown():
 
 @app.route("/", methods=['GET'])
 def login():
+    #Fetch access token if stored
     if path.exists('resources/access_token.txt'):
         return redirect(url_for('get_transactions'))
-    else:
-        return render_template("link.html")
+    #Prompt user to login to recieve an access token
+    return render_template("link.html")
         
 
 if __name__ == "__main__":

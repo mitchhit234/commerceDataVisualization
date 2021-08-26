@@ -404,18 +404,30 @@ def initalize():
 
 #Read from our JSON data from Plaid instead of DB method
 def json_initalize():
+  #load this transaction data
+  #REQUIRES setup to be run at least once before this script for this to work
   with open('resources/transactions.json', 'r') as inp:
     data = json.load(inp)
 
   current_balance = data['accounts'][0]['balances']['current']
+  available_balance = data['accounts'][0]['balances']['available']
 
+  #Usually this will be 0, but let the user know if any transactions
+  #they have made are not accounted for yet and what the dollar amount
+  #of those transactions combined is
+  if current_balance != available_balance:
+    print("$%s of unprocessed transactions" % "{:,.2f}".format(current_balance-available_balance))
+
+  #Grab data, start formatting it into the format I implemented for the old methods
   temp_df = pd.json_normalize(data, record_path=['transactions'])
   cols = ['date','amount','name']
   df = temp_df[cols]
   df = df.iloc[::-1]
 
+  #Account for differing date formats present in transaction json
   df['date'] = normalize_dates(df)
 
+  #Create additional columns needed for data analysis
   debit, credit, num = [], [], []
   for i, row in df.iterrows():
     if row['amount'] > 0:
@@ -426,15 +438,17 @@ def json_initalize():
       credit.append(abs(row['amount']))
     num.append(i+1)
     
-    
+  #Make debits negative and credits positive, and reformat column name to match old code
   df['amount'] = -df['amount']
   df['debit'], df['credit'], df['num'] = debit, credit, num
-
   df = df.rename({'amount': 'net', 'name': 'description'}, axis=1)
 
+  #This is a really not good way to do this but I already had the code so yeah
+  #Creates balance column for data analysis
   start = generate_starting(df,current_balance)
   df['balance'] = fetch_balance_col(df,start)
 
+  #Reorder the columns to work with old code
   df = df[['date', 'num', 'description', 'debit', 'credit', 'net', 'balance']]
 
   return df
