@@ -1,4 +1,3 @@
-# Read env vars from .env file
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
@@ -14,6 +13,9 @@ from flask import jsonify
 from datetime import datetime
 from datetime import timedelta
 from os import path
+from pathlib import Path
+from dotenv import load_dotenv
+from threading import Timer
 import pandas as pd
 import plaid
 import datetime
@@ -21,7 +23,12 @@ import json
 import time
 import webbrowser
 import os
-from dotenv import load_dotenv
+
+#Default filenames, change as needed
+ABSOLUTE = str(Path(__file__).parents[1])
+RESOURCES = ABSOLUTE + '/resources/'
+ACCESS_TOKEN_FILE = RESOURCES + 'access_token.txt'
+TRANSACTIONS_FILE = RESOURCES + 'transactions.json'
 
 #Load our .env variables
 load_dotenv()
@@ -43,8 +50,8 @@ api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
 #Check if theres an access token to read in
-if path.exists('resources/access_token.txt'):
-    with open('resources/access_token.txt', 'r') as inp:
+if path.exists(ACCESS_TOKEN_FILE):
+    with open(ACCESS_TOKEN_FILE, 'r') as inp:
         access_token = inp.read().replace('\n','')
 else:
     access_token = None
@@ -75,7 +82,7 @@ def normalize_date(date_string):
 
 #Get most recent transaction date from plaid json file
 def get_most_recent_date(filename):
-    with open('resources/transactions.json', 'r') as inp:
+    with open(TRANSACTIONS_FILE, 'r') as inp:
         data = json.load(inp)
     temp = pd.json_normalize(data, record_path=['transactions'])
     date_string = normalize_date(temp.iloc[0]['date'])
@@ -83,6 +90,9 @@ def get_most_recent_date(filename):
 
     return datetime.date(int(date[0]),int(date[1]),int(date[2]))
 
+#Open specified url, used in function for threading purposes
+def open_browser():
+    webbrowser.open_new_tab('https://localhost:8000')
 
 @app.route("/create_link_token", methods=['POST'])
 def create_link_token():
@@ -113,10 +123,11 @@ def exchange_public_token():
     )
     response = client.item_public_token_exchange(req2)
     access_token = response['access_token']
-    with open('resources/access_token.txt', 'w') as output:
+    with open(ACCESS_TOKEN_FILE, 'w') as output:
         output.write(access_token)
 
-    return jsonify(response.to_dict())
+    #redirect to get transaction data
+    #return redirect(url_for('get_transactions'))
 
 #Request used for gaining transaction data needed to populate
 #the data analytics application
@@ -125,8 +136,8 @@ def get_transactions():
     # Pull transactions for the last 2 years (or last 500 transactions)
     # if none avaliable, else pull only new transactions
     append = False
-    if path.exists('resources/transactions.json'):
-        start_date = get_most_recent_date('resources/transactions.json')
+    if path.exists(TRANSACTIONS_FILE):
+        start_date = get_most_recent_date(TRANSACTIONS_FILE)
         append = True
     else:
         start_date = (datetime.datetime.now() - timedelta(days=730))
@@ -170,7 +181,7 @@ def get_transactions():
             
             #If transaction file already exists, we try and append to that data
             if append:
-                with open('resources/transactions.json', 'r') as inp:
+                with open(TRANSACTIONS_FILE, 'r') as inp:
                     existing_data = json.load(inp)
                 
                 to_add, i = [], 0
@@ -183,10 +194,10 @@ def get_transactions():
 
                 #Prepend these new transactions to the beggining of our transaction data
                 existing_data['transactions'] = to_add + existing_data['transactions']
-                data = jsonify(existing_data)
-                
+                data.json['transactions'] = existing_data['transactions'] 
+
             #Write transaction data to file         
-            with open('resources/transactions.json', 'w') as output:
+            with open(TRANSACTIONS_FILE, 'w') as output:
                 json.dump(data.json,output, indent=4)
                 return redirect(url_for('shutdown'))
         
@@ -212,12 +223,13 @@ def shutdown():
 @app.route("/", methods=['GET'])
 def login():
     #Fetch access token if stored
-    if path.exists('resources/access_token.txt'):
+    if path.exists(ACCESS_TOKEN_FILE):
         return redirect(url_for('get_transactions'))
     #Prompt user to login to recieve an access token
     return render_template("link.html")
         
 
 if __name__ == "__main__":
-    webbrowser.open('http://localhost:8000')
-    app.run(port=8000,debug=True)
+    #One second delay webbrowser open to give app time to launch
+    Timer(1, open_browser).start()
+    app.run(host='0.0.0.0',ssl_context='adhoc', port=8000)

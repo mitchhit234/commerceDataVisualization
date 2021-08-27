@@ -8,7 +8,9 @@ import graph as gp
 import template as t
 import db_update as update
 import pandas as pd
+import webbrowser
 from datetime import date
+from threading import Timer
 
 #load stylesheets
 global_pathname, global_sortby = '', []
@@ -118,23 +120,14 @@ def update_hover(clickData,pathname):
 
     #Generate the dict that will be the new interactive table output
     ret = pd.DataFrame(gp.format_dict_for_table(temp))
-
-
-
-    # #Find the point that was clicked
-    # data = clickData['points'][0]
-    # wanted_values = ['x', 'y', 'customdata']
-    # d = {key: data[key] for key in wanted_values}
-    # #Format the raw data for table format
-    # d['x'] = date(year=int(d['x'][:4]), month=int(d['x'][5:7]), day=int(d['x'][8:10])).strftime('%b %d %Y')
-    # d['y'] = round(d['y'],2)
-    # ret = pd.DataFrame(data=d, index=[0])
-    # #Set the column names to match the table column names
     ret = ret.rename(columns={"NET": "VALUE"})
-    # ret = ret[['DATE', 'DESCRIPTION', 'BALANCE']]
+
   return ret.to_dict('records'), [{"name": i, "id": i} for i in ret.columns]
 
 
+#Open specified url, used in function for threading purposes
+def open_browser():
+    webbrowser.open(new=0,url='http://localhost:8000')
 
 
 if __name__ == '__main__':
@@ -164,4 +157,6 @@ if __name__ == '__main__':
   fig = gp.balance_plot(df)
   app.layout = t.render_template(fig,table_df)
 
-  app.run_server(port=8000)
+  #One second delay webbrowser open to give app time to launch
+  Timer(1, open_browser).start()
+  app.run_server(host='0.0.0.0',port=8000)
