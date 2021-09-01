@@ -167,7 +167,7 @@ def render_template(fig,df):
                       #Prevents errors when data is small enough to actualy shorthen table size
                       #dash does not handle this well, starts infinite looping
                       style_table={
-                          'minHeight': '400px', 'height': '390px', 'maxHeight': '390px',
+                          'minHeight': '400px', 'height': '400px', 'maxHeight': '400px',
                           'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
                       }
                     ),
@@ -224,7 +224,7 @@ def render_template(fig,df):
                           columns=[{"name": i, "id": i} for i in df.columns],
                           data=[dict(DATE='',DESCRIPTION='',BALANCE='')],
                           style_table={
-                          'minHeight': '0px', 'height': '245px', 'maxHeight': '245px',
+                          'minHeight': '0px', 'height': '220px', 'maxHeight': '220px',
                           'minWidth': '600px', 'width': '600px', 'maxWidth': '600px'
                           }
                         )
