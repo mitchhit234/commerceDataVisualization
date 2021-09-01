@@ -1,12 +1,10 @@
 #!/bin/bash
 
-#pass -s argument for first time setup
-#assumes you have python3 and pip installed
-if [[ $1 = '-s' ]]
+#run with the -u tag if you do not want 
+#to update your transaciton json with plaid
+if [[ $1 != '-u' ]]; 
 then
-	python3 -m pip install -r resources/requirements.txt
-	python3 python_scripts/db_create.py
+  python3 python_scripts/server.py
 fi
 
 python3 python_scripts/app.py
-

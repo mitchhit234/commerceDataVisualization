@@ -53,7 +53,7 @@ def update_page(pathname,sort_by):
 
   #table sort was changed
   else:
-    #sort by value is sort was specified
+    #sort by value if sort was specified
     if len(sort_by):
       col = sort_by[0]['column_id']
 
@@ -62,7 +62,7 @@ def update_page(pathname,sort_by):
 
       if col in dff:    
         dff = dff.sort_values(
-          col,
+          [col, 'DATE'],
           ascending=sort_by[0]['direction'] == 'asc',
           inplace=False
         )
