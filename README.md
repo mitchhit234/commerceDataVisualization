@@ -4,17 +4,16 @@
 
 <br />
 
-Commerce Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data with various 
+Commerce Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. Though since I've integrated the [Plaid API](https://www.plaid.com), this application should work with other banking institutions (a name change is probably in order). This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data with various 
 
 <p align="center">
   <img src="resources/readme/demo.gif">
 </p>
 
-The goal of this project was to give myself an easy way to view my transactions and keep track of my financial goals, as well as monitor for unauthorized transactions. Commerce Bank does not officially provide any data visualization tools (at least for free personal accounts). Any other Commerce Bank user looking to visualize their transaction data can utilize this application
+The goal of this project was to give myself an easy way to view my transactions and keep track of my financial goals, as well as monitor for unauthorized transactions. Commerce Bank does not officially provide any data visualization tools (at least for free personal accounts). Any other Commerce Bank user looking to visualize their transaction data can utilize this application (and maybe other checking and savings accounts, though I have not been able to test their functionality).
 
 
-This web application is run locally to protect your own data. The application is initially loaded with data that you will export from the Commerce Bank online banking portal (6 months worth is what I believe most Commerce accounts get without paying extra). The application uses the Commerce Bank Alerts feature and Gmail's API to automatically update your local transaction data without having to manually export it continuously
-
+This web application is run locally, besides a quick secure connection between yourself and the Plaid API when fetching transaction data, to protect your own data. The application uses the Plaid API to automatically update your local transaction data without having to repeatedly log into your account and export your data manually
 
 
 # Setup Instructions
@@ -43,35 +42,43 @@ update.update(20)
 
 ## Application Setup
 
-All my testing has been done through a Linux machine, however, Windows and Mac users should be able to adapt these instructions with a few tweaks
+All my testing has been done through either a Linux machine or WSL2 Ubuntu and Fedora, however, Windows and Mac users should be able to adapt these instructions with a few tweaks. Open an issue if you have any questions/run into issues
 
-Requires Python3, SQLite3, and pip to be installed
+Requires Python3 and pip to be installed
 
-After all three are installed, run this command
+Next, create a development account at [Plaid API](https://www.plaid.com). Add a .env file to the directory as they describe in the PLAID quickstart guide,
+including your PLAID keys and set PLAID_ENV=development. It will take a day or so to get approval for this development account
+
+After that, create a keypair for SSL by running the following command in the scope of the resources directoy (or follow the comments at the bottom of python_scripts/server.py if you want to skip this step)
 
 ```bash
-bash run.sh -s
+openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
 ```
 
--s signals the script to use the setup process, any future run will not need to pass any parameters to the script. If you are having any issues with pip, make sure its upgraded to the latest version
-
-If using the Alerts feature, the script will redirect you to a webpage to set up the Gmail API. After that, the program will prompt you for your current available account balance to finish initializing the transaction database. After that, the web application will be available to view only on your local machine at the follwing URL
+To use the alternate method, run this command instead
 
 ```
-localhost:8050
+pip install pyopenssl
 ```
 
+Now that all that is complete, go ahead and install the remaining dependencies and run the application (additional command flags are described in the comments of run.sh)
+
+```bash
+python3 -m pip install -r requirements.txt
+bash run.sh
+```
 
 # Areas For Improvement
 
-The main branch of this repo at the moment contains all the features that were in my original MVP plan for Commerce Data Visualization. Features that may be added in the future include
+The main branch of this repo at the moment contains all the features that were in my original MVP plan for Commerce Data Visualization. However, after finding out about Plaid API, there are many more features I could see myself adding. Features that may be added in the future include
 
-- On Hover and On Click graph interaction
-- Querying the Transaction Database
+- Pie Chart by X time period, or by category
+- Searching for transactions by description
+- Aggregate data on transactions by user defined criteria
 - Give different time period options to group by in Debit/Credit/Net-Balance
-- Let users create categories to automatically place transactions in
-- Edit Gmail API to be more efficient (currently does not delete already processed alerts)
+- Let users create categories to automatically place transactions in (or use Plaid categories)
 - Windows Executeable? (all python scripts should be good for Windows, just need to test it myself in a Windows environment)
+- Various frontend improvements
 
 
 
