@@ -6,9 +6,11 @@
 
 Financial Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. However, since I've integrated the [Plaid API](https://www.plaid.com), this application should work with other banking institutions as well (just hasn't been tested yet). This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data in various ways
 
-**Click below to interact with the demo for the web application**
+**Click on the image below to interact with the demo**
 <p align="center">
-  [<img src="resources/readme/demo.png">](http://192.168.87.90:8000)
+  <a href="http://192.168.87.90:8000">
+    <img src="resources/readme/demo.png">
+  </a>
 </p>
 
 
