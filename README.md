@@ -41,9 +41,11 @@ pip install pyopenssl
 Now that all that is complete, go ahead and install the remaining dependencies and run the application (additional command flags are described in the comments of run.sh)
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r resources/requirements.txt
 bash run.sh
 ```
+
+From this point on, follow the instructions as they appear in the web browser
 
 # Areas For Improvement
 
