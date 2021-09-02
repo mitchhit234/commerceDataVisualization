@@ -1,16 +1,18 @@
 <p align="center">
-  <img src="resources/readme/logo.jpg">
+  <img src="resources/readme/logo.png">
 </p>
 
 <br />
 
-Commerce Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. Though since I've integrated the [Plaid API](https://www.plaid.com), this application should work with other banking institutions (a name change might be in order, but I really like this logo, so I'm gonna keep if for now). This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data in various ways
+Financial Data Visualization is a web based banking application used to analyze bank account data for Commerce Bank customers. However, since I've integrated the [Plaid API](https://www.plaid.com), this application should work with other banking institutions as well (just hasn't been tested yet). This web application allows users to make sense out of their transaction data via transaction graphs and tables. Data figures are split up between different categories (debits, credits, etc.), and allow the user to sort their data in various ways
 
+**Click below to interact with the demo for the web application**
 <p align="center">
-  <img src="resources/readme/demo.gif">
+  [<img src="resources/readme/demo.png">](http://192.168.87.90:8000)
 </p>
 
-The goal of this project was to give myself an easy way to view my transactions and keep track of my financial goals, as well as monitor for unauthorized transactions. Commerce Bank does not officially provide any data visualization tools (at least for free personal accounts). Any other Commerce Bank user looking to visualize their transaction data can utilize this application (and maybe other checking and savings accounts, though I have not been able to test their functionality).
+
+The goal of this project was to give myself an easy way to view my transactions and keep track of my financial goals, as well as monitor for unauthorized transactions. Commerce Bank does not officially provide any data visualization tools (at least for my free personal accounts). Any other Commerce Bank user, or any bank user in general, can visualize their transaction data utilizing this application
 
 
 This web application is run locally (besides a quick secure connection between yourself and the Plaid API when fetching transaction data) to protect your own data. The application uses the Plaid API to automatically update your local transaction data without having to repeatedly log into your account and export your data manually

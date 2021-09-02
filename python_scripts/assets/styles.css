@@ -29,9 +29,8 @@ html, body {
 }
 
 .navbar-brand{
-  font-size: 125%;
   position: absolute;
-  left: 33%;
+  left: 30%;
   display: block;
 }
 
