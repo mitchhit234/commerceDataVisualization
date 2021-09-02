@@ -9,6 +9,7 @@ import template as t
 import db_update as update
 import pandas as pd
 import webbrowser
+import sys
 from datetime import date
 from threading import Timer
 
@@ -129,16 +130,15 @@ def update_hover(clickData,pathname):
 def open_browser():
     webbrowser.open(new=0,url='http://localhost:8000')
 
+#Check if an argument exists and if its value equals the input value
+def check_first_arg(value):
+  if len(sys.argv) > 1:
+    return sys.argv[1] == value
+  return False
+
 
 if __name__ == '__main__':
-  #updates the database from commerce alert emails
-  #searches emails as deep as input
-  #(may add deletion of emails later, don't want to start
-  #out with deletion of emails)
-  #update.update(40)
-
   #Base df with all the DB columns + net value
-  #df = gp.initalize()
   df = gp.json_initalize()
   pre_change = df.copy()
   df['date'] = gp.adjust_dates(df)
@@ -158,5 +158,8 @@ if __name__ == '__main__':
   app.layout = t.render_template(fig,table_df)
 
   #One second delay webbrowser open to give app time to launch
-  Timer(1, open_browser).start()
-  app.run_server(host='0.0.0.0',port=8000)
+  if not check_first_arg('-s'):
+    Timer(1, open_browser).start()
+  
+  #Set host=0.0.0.0 if you want application to be viewable over LAN
+  app.run_server(port=8000)

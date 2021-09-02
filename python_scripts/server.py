@@ -23,6 +23,7 @@ import json
 import time
 import webbrowser
 import os
+import sys
 
 #Default filenames, change as needed
 ABSOLUTE = str(Path(__file__).parents[1])
@@ -56,6 +57,13 @@ if path.exists(ACCESS_TOKEN_FILE):
 else:
     access_token = None
 item_id = None
+
+#Check if an argument exists and if its value equals the input value
+def check_first_arg(value):
+  if len(sys.argv) > 1:
+    return sys.argv[1] == value
+  return False
+
 
 #Shutdown after transaction data is recieved in order to 
 #transition into the data analysis application
@@ -231,5 +239,8 @@ def login():
 
 if __name__ == "__main__":
     #One second delay webbrowser open to give app time to launch
-    Timer(1, open_browser).start()
-    app.run(host='0.0.0.0',ssl_context='adhoc', port=8000)
+    if not check_first_arg('-s'):
+        Timer(1, open_browser).start()
+
+    #Set host=0.0.0.0 if you want application to be viewable over LAN
+    app.run(ssl_context='adhoc', port=8000)
