@@ -244,4 +244,4 @@ if __name__ == "__main__":
 
     #Set host=0.0.0.0 if you want application to be viewable over LAN
     #set ssl_context='adhoc' if you don't want to deal with SSL certs
-    app.run(ssl_context=('cert.pem', 'key.pem'), port=8000)
+    app.run(ssl_context=('resources/cert.pem', 'resources/key.pem'), port=8000)
