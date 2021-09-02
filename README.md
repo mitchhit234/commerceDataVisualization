@@ -8,7 +8,7 @@ Financial Data Visualization is a web based banking application used to analyze 
 
 **Click on the image below to interact with the demo**
 <p align="center">
-  <a href="http://192.168.87.90:8000">
+  <a href="http://97.91.150.78:8129" target="_blank">
     <img src="resources/readme/demo.png">
   </a>
 </p>
