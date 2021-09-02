@@ -5,4 +5,5 @@ token_gmail_v1.pickle
 .env
 resources/access_token.txt
 resources/transactions.json
-
+cert.pem
+key.pem
